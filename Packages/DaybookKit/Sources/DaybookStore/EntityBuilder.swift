@@ -187,6 +187,9 @@ public final class EntityBuilder {
                 nameSids[name.lowercased(), default: []].insert(sid)
             }
         }
+        // Linux account names are case-sensitive ("Root" tried by a scanner is not root).
+        let caseSensitive = store.platform == .linux
+        func fold(_ name: String) -> String { caseSensitive ? name : name.lowercased() }
         // Phase 1: key every occurrence. Phase 2: fold "name:?\x" (no domain) into the
         // only domain-qualified "name:D\x" of the same name, if there is exactly one.
         var userKeyOf = [String?](repeating: nil, count: users.count)
@@ -206,9 +209,9 @@ public final class EntityBuilder {
                 if candidates.count == 1, let only = candidates.first {
                     userKeyOf[i] = "sid:" + only
                 } else {
-                    let key = "name:" + (p.domain ?? "?") + "\\" + name.lowercased()
+                    let key = "name:" + (p.domain ?? "?") + "\\" + fold(name)
                     userKeyOf[i] = key
-                    if p.domain != nil { qualified[name.lowercased(), default: []].insert(key) }
+                    if p.domain != nil { qualified[fold(name), default: []].insert(key) }
                 }
             }
         }

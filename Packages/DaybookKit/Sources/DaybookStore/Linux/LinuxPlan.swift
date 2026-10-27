@@ -54,8 +54,7 @@ enum LinuxPlan {
             let root = c.rootFolder
             let host = c.host
             let zone = c.info.timeZone.flatMap(TimeZone.init(identifier:))
-            let bodyTimes = c.bodyfileTimes(under: "/var/")
-                .merging(c.bodyfileTimes(under: "/run/"), uniquingKeysWith: { a, _ in a })
+            let bodyTimes = c.bodyfileTimes(under: ["/var/", "/run/", "/home/", "/root/"])
             var files: [URL] = []
             let logDir = root.appendingPathComponent("var/log")
             if let e = FileManager.default.enumerator(at: logDir, includingPropertiesForKeys: [.isRegularFileKey, .isSymbolicLinkKey]) {
@@ -63,6 +62,23 @@ enum LinuxPlan {
                     let v = try? u.resourceValues(forKeys: [.isRegularFileKey, .isSymbolicLinkKey])
                     guard v?.isRegularFile == true, v?.isSymbolicLink != true, u.lastPathComponent != ".DS_Store" else { continue }
                     files.append(u)
+                }
+            }
+            // Shell and REPL histories of root and of every home folder.
+            var homes = [root.appendingPathComponent("root")]
+            if let users = try? FileManager.default.contentsOfDirectory(at: root.appendingPathComponent("home"),
+                                                                        includingPropertiesForKeys: [.isDirectoryKey, .isSymbolicLinkKey]) {
+                homes += users.filter {
+                    let v = try? $0.resourceValues(forKeys: [.isDirectoryKey, .isSymbolicLinkKey])
+                    return v?.isDirectory == true && v?.isSymbolicLink != true
+                }
+            }
+            for home in homes {
+                let candidates = ((try? FileManager.default.contentsOfDirectory(at: home, includingPropertiesForKeys: nil)) ?? [])
+                    + [home.appendingPathComponent(".local/share/fish/fish_history")]
+                for u in candidates where ShellHistoryFormat.kind(of: u.path) != nil {
+                    let v = try? u.resourceValues(forKeys: [.isRegularFileKey, .isSymbolicLinkKey])
+                    if v?.isRegularFile == true, v?.isSymbolicLink != true { files.append(u) }
                 }
             }
             for extra in ["run/utmp", "var/run/utmp"] {
@@ -77,7 +93,10 @@ enum LinuxPlan {
                 let original = String(full.dropFirst(rootPath.count))
                 let relative = original.hasPrefix("/var/log/") ? String(original.dropFirst("/var/log/".count))
                                                                : (original as NSString).lastPathComponent
-                let channel = logName(relative)
+                var channel = logName(relative)
+                if ShellHistoryFormat.kind(of: original) != nil {
+                    channel = channel.hasPrefix(".") ? String(channel.dropFirst()) : channel   // ".bash_history" → "bash_history"
+                }
                 let v = try? u.resourceValues(forKeys: [.fileSizeKey, .contentModificationDateKey])
                 let body = bodyTimes[original]
                 out.append(LinuxSourcePlan(

@@ -619,6 +619,16 @@
     "LogonId": {
       "shouldTranslate": false
     },
+    "MySQL: подключения и запросы": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MySQL: connections and queries"
+          }
+        }
+      }
+    },
     "NTLM-аутентификации (4776)": {
       "localizations": {
         "en": {
@@ -660,6 +670,16 @@
     },
     "PID": {
       "shouldTranslate": false
+    },
+    "POST-запросы": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "POST requests"
+          }
+        }
+      }
     },
     "Password spraying: неудачи по источнику": {
       "localizations": {
@@ -993,6 +1013,16 @@
     },
     "UTC": {
       "shouldTranslate": false
+    },
+    "User-Agent клиентов": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Client user agents"
+          }
+        }
+      }
     },
     "WinRM: создание сеанса %@": {
       "localizations": {
@@ -1486,6 +1516,16 @@
         }
       }
     },
+    "Веб-серверы": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Web servers"
+          }
+        }
+      }
+    },
     "Версия": {
       "localizations": {
         "en": {
@@ -1916,22 +1956,22 @@
         }
       }
     },
+    "Выполнение": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Execution"
+          }
+        }
+      }
+    },
     "Выполнение и закрепление": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Execution and persistence"
-          }
-        }
-      }
-    },
-    "Выполнение и сеть": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Execution and network"
           }
         }
       }
@@ -2490,6 +2530,16 @@
         }
       }
     },
+    "Записи без своего времени": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Records without a time of their own"
+          }
+        }
+      }
+    },
     "Запись": {
       "localizations": {
         "en": {
@@ -2550,6 +2600,16 @@
         }
       }
     },
+    "Запросы по адресам": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Requests by address"
+          }
+        }
+      }
+    },
     "Запуск": {
       "localizations": {
         "en": {
@@ -2602,6 +2662,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "PowerShell console started"
+          }
+        }
+      }
+    },
+    "Запуски программ (auditd)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Program launches (auditd)"
           }
         }
       }
@@ -3110,6 +3180,16 @@
         }
       }
     },
+    "Команды из историй оболочек": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Commands from shell histories"
+          }
+        }
+      }
+    },
     "Компиляция %@ мс, предрасчёт подстрок %@ мс (%@ предикатов), вычисление %@ мс": {
       "localizations": {
         "en": {
@@ -3582,12 +3662,12 @@
         }
       }
     },
-    "Неудачные входы (btmp)": {
+    "Неудачные входы (btmp, auditd)": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Failed logins (btmp)"
+            "value": "Failed logins (btmp, auditd)"
           }
         }
       }
@@ -3844,6 +3924,16 @@
         }
       }
     },
+    "Ответы 4xx / 5xx": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "4xx / 5xx responses"
+          }
+        }
+      }
+    },
     "Отключена задача %@": {
       "localizations": {
         "en": {
@@ -4006,6 +4096,16 @@
         }
       }
     },
+    "Пакеты и базы данных": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Packages and databases"
+          }
+        }
+      }
+    },
     "Папка с правилами Sigma (.yml)": {
       "localizations": {
         "en": {
@@ -4016,12 +4116,12 @@
         }
       }
     },
-    "Папка считается распакованным сбором UAC (Unix-like Artifacts Collector): журналы берутся из [root]/var/log, сведения о системе — из uac.log. Разбираются журналы в формате syslog (auth.log, syslog, kern.log и другие, включая ротации .gz и .xz) и записи входов wtmp, btmp, utmp, lastlog. Остальные файлы /var/log тоже попадают в список источников с причиной, по которой они не разобраны.": {
+    "Папка считается распакованным сбором UAC (Unix-like Artifacts Collector): журналы берутся из [root]/var/log, истории оболочек — из домашних папок, сведения о системе — из uac.log. Разбираются syslog (auth.log, syslog, kern.log…), auditd, журналы веб-серверов (access, JSON, error), dpkg и apt, общий журнал MySQL, журналы вида «время + текст», wtmp, btmp, utmp, lastlog и истории bash, zsh, fish — включая ротации .gz и .xz. Файлы, которые не разобраны, тоже попадают в список источников с причиной.": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The folder is read as an extracted UAC (Unix-like Artifacts Collector) collection: logs come from [root]/var/log, system details from uac.log. Logs in syslog format (auth.log, syslog, kern.log and others, including .gz and .xz rotations) and the login records wtmp, btmp, utmp and lastlog are parsed. The other files of /var/log are listed as sources too, with the reason they were not parsed."
+            "value": "The folder is read as an extracted UAC (Unix-like Artifacts Collector) collection: logs come from [root]/var/log, shell histories from the home folders, system details from uac.log. Parsed: syslog (auth.log, syslog, kern.log…), auditd, web server logs (access, JSON, error), dpkg and apt, the MySQL general log, \"time + text\" logs, wtmp, btmp, utmp, lastlog and bash, zsh and fish histories — including .gz and .xz rotations. Files that are not parsed are listed as sources too, with the reason."
           }
         }
       }
@@ -5075,6 +5175,16 @@
         }
       }
     },
+    "Сеть": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Network"
+          }
+        }
+      }
+    },
     "Сеть: %@ → %@:%@%@": {
       "localizations": {
         "en": {
@@ -5127,6 +5237,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "System:"
+          }
+        }
+      }
+    },
+    "Скачивание и запуск из /tmp, /dev/shm": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Downloads and launches from /tmp, /dev/shm"
           }
         }
       }
@@ -5857,6 +5977,16 @@
         }
       }
     },
+    "Транзакции apt": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "apt transactions"
+          }
+        }
+      }
+    },
     "Убрать закладку": {
       "localizations": {
         "en": {
@@ -5997,6 +6127,16 @@
           "stringUnit": {
             "state": "new",
             "value": "Успешный вход %1$@ (тип %2$@%3$@)%4$@%5$@"
+          }
+        }
+      }
+    },
+    "Установка и удаление пакетов (dpkg)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Package installs and removals (dpkg)"
           }
         }
       }
@@ -6697,6 +6837,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "yes"
+          }
+        }
+      }
+    },
+    "двоичный файл — формат не поддерживается": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "binary file — format not supported"
           }
         }
       }
@@ -7511,6 +7661,16 @@
         }
       }
     },
+    "своего времени нет — время соседней записи": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "no time of its own — the time of a neighbouring record"
+          }
+        }
+      }
+    },
     "сервер в неверном состоянии": {
       "localizations": {
         "en": {
@@ -7651,12 +7811,12 @@
         }
       }
     },
-    "строка не разобрана — время предыдущей строки": {
+    "строка не разобрана": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "line not parsed — time of the previous line"
+            "value": "line not parsed"
           }
         }
       }
@@ -7687,6 +7847,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "password must change"
+          }
+        }
+      }
+    },
+    "у записей нет своего времени: взято время изменения копии файла": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "the records have no time of their own: the modification time of the file's copy is used"
+          }
+        }
+      }
+    },
+    "у записей нет своего времени: взято время изменения файла из bodyfile": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "the records have no time of their own: the file's modification time from the bodyfile is used"
           }
         }
       }

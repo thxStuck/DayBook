@@ -40,6 +40,9 @@ public struct RecordFlags: OptionSet, Sendable, Hashable {
     public static let notDecompressed = RecordFlags(rawValue: 1 << 16)
     /// The line matched no known format; it is kept whole in `Message`.
     public static let unparsed = RecordFlags(rawValue: 1 << 17)
+    /// The record has no time of its own; it has the time of the record before it (or after it, at
+    /// the start of a file), so its place in the file's order is kept.
+    public static let timeCarried = RecordFlags(rawValue: 1 << 18)
 
     /// Names used in queries (`flag = …`), exports and the `@Flag` posting lists. The order is
     /// part of the case format: names are interned in this order.
@@ -49,7 +52,7 @@ public struct RecordFlags: OptionSet, Sendable, Hashable {
         (.timeSkew, "timeSkew"), (.foreignTemplate, "foreignTemplate"), (.missingTemplate, "missingTemplate"),
         (.invalidText, "invalidText"), (.sizeMismatch, "sizeMismatch"), (.duplicate, "hasCopies"),
         (.yearInferred, "yearInferred"), (.zoneAssumed, "zoneAssumed"), (.timeFromFile, "timeFromFile"),
-        (.notDecompressed, "notDecompressed"), (.unparsed, "unparsed"),
+        (.notDecompressed, "notDecompressed"), (.unparsed, "unparsed"), (.timeCarried, "timeCarried"),
     ]
 }
 

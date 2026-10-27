@@ -51,8 +51,19 @@ enum LinuxVocabulary {
         "Euid", "LogName", "CommandLine", "CurrentDirectory", "TargetGroup", "Environment", "Gid", "HomeDirectory",
         "Shell", "GroupName", "FirewallRule", "InInterface", "OutInterface", "SourceIp", "DestinationIp", "Protocol",
         "SourcePort", "DestinationPort", "Mac", "Type", "KernelVersion", "RunLevel", "TerminalId", "ExitStatus",
+        // web, application and package logs
+        "HttpMethod", "Uri", "HttpVersion", "HttpStatus", "ResponseBytes", "Referer", "UserAgent", "Ident", "Request",
+        "Server", "Upstream", "Host", "ConnectionId", "Prefix", "PackageName", "PackageArch", "Version", "OldVersion",
+        "PackageStatus", "DpkgPhase", "ConfigFile", "ConffileAction", "EndDate", "Install", "Upgrade", "Remove", "Purge",
+        "Downgrade", "Reinstall", "Error", "Shell", "DbCommand", "DbArgument", "DbUser", "Database", "UserName",
+        // audit
+        "AuditId", "comm", "exe", "syscall", "key", "success", "exit", "res", "acct", "addr", "hostname", "op",
+        "pid", "ppid", "auid", "uid", "euid", "gid", "ses", "tty", "cwd", "name", "proctitle", "argc", "cmd",
+        "a0", "a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "SyscallName", "AuidName", "UidName", "EuidName",
     ]
-    private static let byLower = Dictionary(uniqueKeysWithValues: fields.map { ($0.lowercased(), $0) })
+    // Audit's raw `uid` and the normalised `Uid` differ only in case: the first spelling wins here,
+    // DQL still prefers an exact field name.
+    private static let byLower = Dictionary(fields.map { ($0.lowercased(), $0) }, uniquingKeysWith: { a, _ in a })
 
     static func field(_ lowercased: String) -> String? { byLower[lowercased] }
 }

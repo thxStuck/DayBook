@@ -107,7 +107,9 @@ extension CaseStore {
             }
             // Users by name: compare against the display name and every alias.
             let split = EntityNames.splitUser(v, domain: nil)
-            let wantName = split?.name.lowercased() ?? v.lowercased()
+            // Linux account names are case-sensitive, Windows ones are not.
+            let exact = platform == .linux
+            let wantName = exact ? split?.name ?? v : split?.name.lowercased() ?? v.lowercased()
             let wantDomain = split?.domain
             let st = try rowsDB.prepare("SELECT id, display, aliases FROM entity WHERE kind = ?")
             st.bind(1, kind.rawValue)
@@ -115,7 +117,7 @@ extension CaseStore {
                 let names = [st.string(1)] + ((try? JSONSerialization.jsonObject(with: Data(st.string(2).utf8))) as? [String] ?? [])
                 let hit = names.contains { n in
                     guard let s = EntityNames.splitUser(n, domain: nil) else { return false }
-                    return s.name.lowercased() == wantName && (wantDomain == nil || s.domain == wantDomain)
+                    return (exact ? s.name : s.name.lowercased()) == wantName && (wantDomain == nil || s.domain == wantDomain)
                 }
                 if hit { out.append(Int(st.int64(0))) }
             }

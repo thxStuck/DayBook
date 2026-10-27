@@ -1,18 +1,21 @@
 import EvtxCore
 import Foundation
 
-/// A unit of parallel work: a run of lines of one text source, or one whole binary source.
+/// A unit of parallel work: a run of records of one text source, or one whole binary source.
 struct LinuxJob: Sendable {
     var source: Int
     /// Byte range in the (unpacked) content; whole file for binary sources.
     var bytes: Range<Int>
     /// Number of the line at `bytes.lowerBound` (1-based).
     var firstLine: Int
-    var format: Syslog.Format?
-    /// Classic syslog: year of the first dated line of the job.
+    /// Text format (`TextFormats.named`).
+    var formatName: String?
+    /// Classic syslog: year of the first dated record of the job.
     var firstYear: Int?
-    /// Time given to undated lines before the job's first dated line.
+    /// Time given to undated records before the job's first dated record.
     var carryTs: Int64?
+    /// The file has no dated record at all: undated records have the file's modification time.
+    var noDates = false
 }
 
 /// Turns syslog time stamps into UTC, carrying the inferred year from line to line.
@@ -42,24 +45,58 @@ struct SyslogClock {
 }
 
 enum LinuxText {
-    static let linesPerJob = 200_000
+    static let recordsPerJob = 20_000
 
-    /// Pass 1 of a syslog source: detects the format, splits the file into jobs and returns the
-    /// sort key of every line. nil when the content is not syslog.
-    static func plan(_ p: LinuxSourcePlan, data: Data, src: Int) -> (format: Syslog.Format, jobs: [LinuxJob], keys: [[RecordKey]], skipped: Int)? {
+    struct Planned {
+        var format: TextLogFormat
+        var jobs: [LinuxJob]
+        var keys: [[RecordKey]]
+        /// Empty lines.
+        var skipped: Int
+        var noDates: Bool
+    }
+
+    /// Lines grouped into records by `format`; empty lines are reported to `skipped`.
+    static func forEachRecord(_ data: Data, in range: Range<Int>, firstNumber: Int, format: TextLogFormat,
+                              skipped: (LogLine) -> Void = { _ in }, _ body: (TextRecord) -> Bool) {
+        var current: TextRecord?
+        var stopped = false
+        LogLines.forEach(data, in: range, firstNumber: firstNumber) { line in
+            guard line.offset < range.upperBound else { return false }
+            if line.text.isEmpty { skipped(line); return true }
+            if let c = current, format.continues(line, record: c.first) {
+                current!.lines.append(line)
+                return true
+            }
+            if let c = current, !body(c) { stopped = true; return false }
+            current = TextRecord(lines: [line])
+            return true
+        }
+        if !stopped, let c = current { _ = body(c) }
+    }
+
+    /// Pass 1 of a text source: detects the format, splits the file into jobs at record starts and
+    /// returns the sort key of every record. nil when no known format fits.
+    // swiftlint:disable:next function_body_length
+    static func plan(_ p: LinuxSourcePlan, data: Data, src: Int) -> Planned? {
         var sample: [LogLine] = []
         LogLines.forEach(data, in: 0..<data.count, firstNumber: 1) { line in
             if !line.text.isEmpty { sample.append(line) }
             return sample.count < 200
         }
-        guard let format = Syslog.detect(sample) else { return nil }
+        guard let format = TextFormats.detect(p, sample: sample) else { return nil }
 
-        // Classic syslog: count year changes (Dec → Jan) to find the year of the first line.
+        // Classic time stamps have no year: count year changes (Dec → Jan) to find the first one.
         var firstYear: Int?
-        if format == .bsd {
+        var sampleBsd = false
+        forEachRecord(data, in: 0..<min(data.count, 1 << 20), firstNumber: 1, format: format) { r in
+            if case .bsd? = format.stamp(r).stamp { sampleBsd = true; return false }
+            return true
+        }
+        if sampleBsd {
             var wraps = 0, prev: Int?, last: (Int, Int)?
-            LogLines.forEach(data, in: 0..<data.count, firstNumber: 1) { line in
-                guard let s = Syslog.parse(line.text), case let .bsd(month, day, _, _, _, _) = s.stamp else { return true }
+            forEachRecord(data, in: 0..<data.count, firstNumber: 1, format: format) { r in
+                guard case let .bsd(month, day, _, _, _, _)? = format.stamp(r).stamp else { return true }
                 if let p = prev, p > month + 6 { wraps += 1 }
                 prev = month
                 last = (month, day)
@@ -71,88 +108,80 @@ enum LinuxText {
             }
         }
 
-        let compressed = p.size != data.count
         var clock = SyslogClock(zone: p.zone, firstYear: firstYear)
-        var jobs: [LinuxJob] = []
-        var keys: [[RecordKey]] = []
-        var current: [RecordKey] = []
-        var job = LinuxJob(source: src, bytes: 0..<data.count, firstLine: 1, format: format, firstYear: firstYear, carryTs: nil)
-        var lastTs: Int64?
-        var firstDatedTs: Int64?
-        var pendingUndated: [(job: Int, index: Int)] = []
+        var jobs: [LinuxJob] = [], keys: [[RecordKey]] = [], current: [RecordKey] = []
+        var job = LinuxJob(source: src, bytes: 0..<data.count, firstLine: 1, formatName: format.name, firstYear: firstYear)
+        var lastTs: Int64?, firstDatedTs: Int64?
+        var pending: [(job: Int, index: Int)] = []
         var skipped = 0
         var startedDated = false
-        LogLines.forEach(data, in: 0..<data.count, firstNumber: 1) { line in
-            if !compressed, current.count >= linesPerJob {
-                job.bytes = job.bytes.lowerBound..<line.offset
+        forEachRecord(data, in: 0..<data.count, firstNumber: 1, format: format, skipped: { _ in skipped += 1 }) { r in
+            if current.count >= recordsPerJob {
+                job.bytes = job.bytes.lowerBound..<r.first.offset
                 jobs.append(job)
                 keys.append(current)
                 current = []
-                job = LinuxJob(source: src, bytes: line.offset..<data.count, firstLine: line.number, format: format,
-                               firstYear: clock.year, carryTs: lastTs)
+                job = LinuxJob(source: src, bytes: r.first.offset..<data.count, firstLine: r.first.number,
+                               formatName: format.name, firstYear: clock.year, carryTs: lastTs)
                 startedDated = false
             }
-            guard !line.text.isEmpty else { skipped += 1; return true }
-            var flags: RecordFlags = line.invalidText ? .invalidText : []
+            var flags: RecordFlags = r.lines.contains(where: \.invalidText) ? .invalidText : []
+            let st = format.stamp(r)
             var ts: Int64 = 0
-            var host = p.host
-            if let s = Syslog.parse(line.text) {
-                let t = clock.time(s.stamp)
-                if !startedDated, case .bsd = s.stamp { job.firstYear = clock.year }
+            if let stamp = st.stamp {
+                let t = clock.time(stamp)
+                if !startedDated, case .bsd = stamp { job.firstYear = clock.year }
                 startedDated = true
                 ts = t.ts
                 flags.formUnion(t.flags)
-                host = String(s.host)
                 lastTs = ts
                 if firstDatedTs == nil { firstDatedTs = ts }
+            } else if let lastTs {
+                ts = lastTs
             } else {
-                flags.insert(.unparsed)
-                if let lastTs { ts = lastTs } else { pendingUndated.append((jobs.count, current.count)) }
+                pending.append((jobs.count, current.count))
             }
-            current.append(RecordKey(ts: ts, computer: host, channel: p.channel, rid: UInt64(line.number), eid: 0,
-                                     src: src, chunk: 0, off: line.offset, flags: flags))
+            current.append(RecordKey(ts: ts, computer: st.host.map(String.init) ?? p.host, channel: p.channel,
+                                     rid: UInt64(r.first.number), eid: 0, src: src, chunk: 0, off: r.first.offset, flags: flags))
             return true
         }
         jobs.append(job)
         keys.append(current)
-        for (j, i) in pendingUndated { keys[j][i].ts = firstDatedTs ?? 0 }
-        for j in jobs.indices where jobs[j].carryTs == nil { jobs[j].carryTs = firstDatedTs }
-        return (format, jobs, keys, skipped)
+        let fallback = firstDatedTs ?? FileTime.fromUnixSeconds(Int64(p.reference.timeIntervalSince1970.rounded(.down)))
+        for (j, i) in pending { keys[j][i].ts = fallback }
+        for j in jobs.indices where jobs[j].carryTs == nil {
+            jobs[j].carryTs = fallback
+            jobs[j].noDates = firstDatedTs == nil
+        }
+        return Planned(format: format, jobs: jobs, keys: keys, skipped: skipped, noDates: firstDatedTs == nil)
     }
 
     /// Pass 2: the records of a job, one per key of pass 1.
     static func records(_ p: LinuxSourcePlan, data: Data, job: LinuxJob) -> [CaseRecord] {
+        guard let format = job.formatName.flatMap(TextFormats.named) else { return [] }
         var clock = SyslogClock(zone: p.zone, firstYear: job.firstYear)
         var out: [CaseRecord] = []
         var lastTs = job.carryTs ?? 0
-        LogLines.forEach(data, in: job.bytes, firstNumber: job.firstLine) { line in
-            guard line.offset < job.bytes.upperBound else { return false }
-            guard !line.text.isEmpty else { return true }
-            var flags: RecordFlags = line.invalidText ? .invalidText : []
-            guard let s = Syslog.parse(line.text) else {
-                flags.insert(.unparsed)
-                out.append(CaseRecord(timestamp: lastTs, writtenTime: lastTs, recordId: UInt64(line.number), provider: "",
-                                      channel: p.channel, computer: p.host, flags: flags,
-                                      fields: [CaseField("Message", line.text)]))
-                return true
+        forEachRecord(data, in: job.bytes, firstNumber: job.firstLine, format: format) { r in
+            let parsed = format.parse(r, plan: p)
+            var flags = parsed.flags
+            if r.lines.contains(where: \.invalidText) { flags.insert(.invalidText) }
+            let ts: Int64
+            if let stamp = parsed.stamp {
+                let t = clock.time(stamp)
+                ts = t.ts
+                flags.formUnion(t.flags)
+                lastTs = ts
+            } else {
+                ts = lastTs
+                if !parsed.timeIsInherited { flags.insert(job.noDates ? .timeFromFile : .timeCarried) }
             }
-            let t = clock.time(s.stamp)
-            lastTs = t.ts
-            flags.formUnion(t.flags)
-            var f = LinuxFields(host: s.host)
-            f.add("Message", s.message)
-            var level = SyslogMessages.extract(program: s.program, message: s.message, into: &f)
-            if let pid = s.pid { f.add("ProcessId", String(pid)) }
-            if let pri = s.priority {
-                f.add("Facility", pri >> 3 < Syslog.facilities.count ? Syslog.facilities[pri >> 3] : String(pri >> 3))
-                f.add("Severity", Syslog.severities[pri & 7])
-                level = Syslog.level(severity: pri & 7)
-            }
-            var r = CaseRecord(timestamp: t.ts, writtenTime: t.ts, recordId: UInt64(line.number), provider: String(s.program),
-                               channel: p.channel, computer: String(s.host), flags: flags, fields: f.list)
-            r.level = level
-            r.processId = s.pid
-            out.append(r)
+            var c = CaseRecord(timestamp: ts, writtenTime: ts, recordId: UInt64(r.first.number), provider: parsed.provider,
+                               channel: p.channel, computer: parsed.host ?? p.host, flags: flags, fields: parsed.fields)
+            c.level = parsed.level
+            c.processId = parsed.pid
+            c.eventId = parsed.eventId
+            out.append(c)
             return true
         }
         return out

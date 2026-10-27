@@ -49,7 +49,6 @@ public final class UacImporter: @unchecked Sendable {
         var jobs: [LinuxJob] = []
         var keys: [[RecordKey]] = []
         var format: String
-        var parsed = 0
         var skipped = 0
         var notes: [String] = []
         var error: String?
@@ -90,14 +89,16 @@ public final class UacImporter: @unchecked Sendable {
         let assignment = CaseWriter.assign(jobKeys, merge: false)
         if cancelled() { throw CancellationError() }
 
-        // Pass 2: records, re-read job by job.
+        // Pass 2: records, re-read job by job (a file split into several jobs is read or unpacked once).
         let allJobs = jobs, allKeys = jobKeys
+        let contents = ContentCache(jobs.map(\.source))
         let produce: @Sendable (Range<Int>) -> [[CaseRecord?]] = { range in
             parallelMap(range.count) { k in
                 let j = range.lowerBound + k
                 let job = allJobs[j], plan = plans[job.source], keys = allKeys[j]
                 var records: [CaseRecord] = []
-                if let data = LogBytes.read(plan.url).data {
+                defer { contents.finished(job.source) }
+                if let data = contents.content(job.source, url: plan.url) {
                     switch plan.kind {
                     case .text: records = LinuxText.records(plan, data: data, job: job)
                     default: records = LinuxBinary.events(plan, data: data, src: job.source,
@@ -122,7 +123,6 @@ public final class UacImporter: @unchecked Sendable {
             var s = CaseSource(url: p.url, size: p.size, sha256: hashes[i], format: results[i].format)
             s.channel = p.channel
             s.host = p.host
-            s.parsed = results[i].parsed
             s.skipped = results[i].skipped
             s.note = results[i].notes.isEmpty ? nil : results[i].notes.joined(separator: "; ")
             return s
@@ -163,17 +163,24 @@ public final class UacImporter: @unchecked Sendable {
         switch p.kind {
         case .text:
             guard let plan = LinuxText.plan(p, data: data, src: src) else {
+                if data.prefix(4096).contains(0) {
+                    return FileResult(format: "binary", notes: notes + [String(localized: "двоичный файл — формат не поддерживается")])
+                }
                 return FileResult(format: "text", notes: notes + [String(localized: "формат строк не распознан — файл не разобран")])
             }
-            var r = FileResult(jobs: plan.jobs, keys: plan.keys, format: plan.format == .bsd ? "syslog-bsd" : "syslog")
+            var r = FileResult(jobs: plan.jobs, keys: plan.keys, format: plan.format.name)
             let all = plan.keys.joined()
-            r.parsed = all.filter { $0.flags & RecordFlags.unparsed.rawValue == 0 }.count
             r.skipped = plan.skipped
             let assumed = all.contains { $0.flags & RecordFlags.zoneAssumed.rawValue != 0 }
-            if plan.format == .bsd {
+            if all.contains(where: { $0.flags & RecordFlags.yearInferred.rawValue != 0 }) {
                 notes.append(p.referenceFromBodyfile
                     ? String(localized: "год восстановлен по времени изменения файла из bodyfile")
                     : String(localized: "год восстановлен по времени изменения копии файла"))
+            }
+            if plan.noDates {
+                notes.append(p.referenceFromBodyfile
+                    ? String(localized: "у записей нет своего времени: взято время изменения файла из bodyfile")
+                    : String(localized: "у записей нет своего времени: взято время изменения копии файла"))
             }
             if assumed {
                 notes.append(p.zone == nil ? String(localized: "пояс в строках не указан и в сборе не записан: принято UTC")
@@ -192,11 +199,45 @@ public final class UacImporter: @unchecked Sendable {
             default: format = "utmp"
             }
             var r = FileResult(jobs: [job], keys: [e.keys], format: format)
-            r.parsed = e.keys.count
             r.skipped = e.skipped
             if e.skipped > 0 { notes.append(String(localized: "записей с недопустимым типом или временем, а также неполных: \(e.skipped)")) }
             r.notes = notes
             return r
+        }
+    }
+}
+
+/// Unpacked content of the files being written, shared by the jobs of one file and dropped after
+/// its last job.
+final class ContentCache: @unchecked Sendable {
+    private let lock = NSLock()
+    private var data: [Int: Data] = [:]
+    private var remaining: [Int: Int] = [:]
+    private var fileLocks: [Int: NSLock] = [:]
+
+    init(_ jobSources: [Int]) {
+        for s in jobSources { remaining[s, default: 0] += 1 }
+    }
+
+    func content(_ source: Int, url: URL) -> Data? {
+        let fileLock = lock.withLock { () -> NSLock in
+            if let l = fileLocks[source] { return l }
+            let l = NSLock()
+            fileLocks[source] = l
+            return l
+        }
+        return fileLock.withLock {
+            if let d = lock.withLock({ data[source] }) { return d }
+            guard let d = LogBytes.read(url).data else { return nil }
+            lock.withLock { data[source] = d }
+            return d
+        }
+    }
+
+    func finished(_ source: Int) {
+        lock.withLock {
+            remaining[source, default: 1] -= 1
+            if remaining[source]! <= 0 { data[source] = nil }
         }
     }
 }

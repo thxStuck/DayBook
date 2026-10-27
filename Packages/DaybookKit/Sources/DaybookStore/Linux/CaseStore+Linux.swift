@@ -52,11 +52,22 @@ extension CaseStore {
                 d.sourceState = .recordMismatch
                 return d
             }
-            var line: LogLine?
-            LogLines.forEach(data, in: offset..<data.count, firstNumber: lineNumber) { l in line = l; return false }
-            let end = data[offset...].firstIndex(of: 0x0A) ?? data.count
+            // The whole record: multi-line formats (an audit event, an apt run) span several lines.
+            var record: TextRecord?
+            if let format = info.format.flatMap(TextFormats.named) {
+                LinuxText.forEachRecord(data, in: offset..<data.count, firstNumber: lineNumber, format: format) { r in
+                    record = r
+                    return false
+                }
+            }
+            if record == nil {
+                LogLines.forEach(data, in: offset..<data.count, firstNumber: lineNumber) { l in record = TextRecord(lines: [l]); return false }
+            }
+            let last = record?.lines.last
+            let lastStart = last?.offset ?? offset
+            let end = data[lastStart...].firstIndex(of: 0x0A) ?? data.count
             d.raw = Array(data[offset..<end])
-            d.text = line?.text ?? ""
+            d.text = record?.text ?? ""
         }
         d.sourceState = .loaded
         return d

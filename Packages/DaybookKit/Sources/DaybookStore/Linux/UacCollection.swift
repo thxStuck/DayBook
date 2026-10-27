@@ -109,8 +109,8 @@ public struct UacCollection: Sendable {
         return out
     }
 
-    /// Modification times (Unix seconds) the bodyfile recorded for paths under `prefix`.
-    func bodyfileTimes(under prefix: String) -> [String: Int64] {
+    /// Modification times (Unix seconds) the bodyfile recorded for paths under the prefixes.
+    func bodyfileTimes(under prefixes: [String]) -> [String: Int64] {
         guard let text = Self.regularFileText(url.appendingPathComponent("bodyfile/bodyfile.txt"), limit: 2 << 30) else { return [:] }
         var out: [String: Int64] = [:]
         for line in text.split(separator: "\n") {
@@ -118,7 +118,7 @@ public struct UacCollection: Sendable {
             let p = line.split(separator: "|", omittingEmptySubsequences: false)
             guard p.count >= 11 else { continue }
             let name = p[1..<(p.count - 9)].joined(separator: "|")
-            guard name.hasPrefix(prefix), let mtime = Int64(p[p.count - 3]) else { continue }
+            guard prefixes.contains(where: { name.hasPrefix($0) }), let mtime = Int64(p[p.count - 3]) else { continue }
             out[name] = mtime
         }
         return out

@@ -140,7 +140,8 @@ enum EventText {
         if f.contains(.zoneAssumed) { out.append(String(localized: "пояса в строке нет — принят пояс системы из сбора")) }
         if f.contains(.timeFromFile) { out.append(String(localized: "своего времени нет — время изменения файла")) }
         if f.contains(.notDecompressed) { out.append(String(localized: "сжатое значение не распаковано")) }
-        if f.contains(.unparsed) { out.append(String(localized: "строка не разобрана — время предыдущей строки")) }
+        if f.contains(.unparsed) { out.append(String(localized: "строка не разобрана")) }
+        if f.contains(.timeCarried) { out.append(String(localized: "своего времени нет — время соседней записи")) }
         return out
     }
 }

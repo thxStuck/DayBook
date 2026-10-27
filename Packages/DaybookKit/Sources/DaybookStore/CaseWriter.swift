@@ -247,8 +247,8 @@ public final class CaseWriter: @unchecked Sendable {
         let sourceNames = try labels.map { try interner.id($0) }
 
         let jobs = jobKeys.count
-        var perSource = [(records: Int, carved: Int, dups: Int, first: Int64, last: Int64)](
-            repeating: (0, 0, 0, .max, .min), count: sources.count)
+        var perSource = [(records: Int, carved: Int, dups: Int, first: Int64, last: Int64, unparsed: Int)](
+            repeating: (0, 0, 0, .max, .min, 0), count: sources.count)
         let groups = stride(from: 0, to: jobs, by: max(1, groupSize)).map { $0..<min($0 + max(1, groupSize), jobs) }
         var written = 0
         var lastReport = Date.distantPast
@@ -312,6 +312,7 @@ public final class CaseWriter: @unchecked Sendable {
 
                     var s = perSource[Int(rk.src)]
                     if e.flags.contains(.carved) { s.carved += 1 } else { s.records += 1 }
+                    if e.flags.contains(.unparsed) { s.unparsed += 1 }
                     s.first = min(s.first, e.timestamp)
                     s.last = max(s.last, e.timestamp)
                     perSource[Int(rk.src)] = s
@@ -359,7 +360,7 @@ public final class CaseWriter: @unchecked Sendable {
                 .bind(14, s.last == .min ? nil : s.last).bind(15, x?.emptyChunks).bind(16, x?.beyondNew)
                 .bind(17, x?.beyondStale).bind(18, x?.badHeaderCRC).bind(19, x?.badDataCRC).bind(20, x?.trailingBytes)
                 .bind(21, x?.version).bind(22, f.format).bind(23, f.channel).bind(24, f.host)
-                .bind(25, f.parsed).bind(26, f.skipped).bind(27, f.note).run()
+                .bind(25, f.parsed ?? (f.format == "evtx" ? nil : s.records - s.unparsed)).bind(26, f.skipped).bind(27, f.note).run()
         }
         let meta = try db.prepare("INSERT INTO meta(key, value) VALUES (?, ?)")
         for (k, v) in [("schema", String(CaseSchema.version)), ("events", String(written)),

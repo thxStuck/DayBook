@@ -170,3 +170,21 @@ enum LogLines {
         return true
     }
 }
+
+/// Byte-level search in UTF-8 text (much faster than Character-based `range(of:)`).
+enum Bytes {
+    static func find(_ needle: StaticString, in s: Substring) -> Range<String.Index>? {
+        let n = needle.utf8CodeUnitCount
+        guard n > 0 else { return nil }
+        let first = needle.utf8Start.pointee
+        let u = s.utf8
+        var i = u.startIndex
+        while let hit = u[i...].firstIndex(of: first) {
+            var j = hit, k = 0
+            while k < n, j < u.endIndex, u[j] == needle.utf8Start[k] { j = u.index(after: j); k += 1 }
+            if k == n { return hit..<j }
+            i = u.index(after: hit)
+        }
+        return nil
+    }
+}

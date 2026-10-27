@@ -74,7 +74,7 @@ enum Presets {
             Preset(title: String(localized: "SSH: успешные входы"), query: "Action = auth_success | group by TargetUserName, IpAddress, AuthMethod"),
             Preset(title: String(localized: "SSH: неудачные попытки"), query: "Action in (auth_failure, invalid_user, user_not_allowed, too_many_auth_failures) | group by IpAddress, TargetUserName"),
             Preset(title: String(localized: "SSH: перебор по источнику"), query: "Action in (auth_failure, invalid_user, user_not_allowed) | group by IpAddress | sort count desc"),
-            Preset(title: String(localized: "Неудачные входы (btmp)"), query: "Action = login_failed | group by TargetUserName, IpAddress"),
+            Preset(title: String(localized: "Неудачные входы (btmp, auditd)"), query: "Action = login_failed | group by IpAddress, TargetUserName | sort count desc"),
             Preset(title: String(localized: "Входы и выходы (wtmp)"), query: "Action in (login, logout) and channel = wtmp"),
             Preset(title: String(localized: "Загрузки и выключения"), query: "Action in (boot, shutdown, runlevel)"),
             Preset(title: String(localized: "Учётные записи и группы"), query: "Action in (user_added, user_deleted, user_modified, group_added, group_deleted, group_member_added, group_member_removed, password_changed)"),
@@ -84,13 +84,30 @@ enum Presets {
             Preset(title: String(localized: "sudo: отказы"), query: "Action = sudo_denied"),
             Preset(title: String(localized: "su"), query: "Action in (su, su_failed)"),
         ]),
-        (String(localized: "Выполнение и сеть"), [
+        (String(localized: "Выполнение"), [
+            Preset(title: String(localized: "Запуски программ (auditd)"), query: "Action = process_exec | group by SubjectUserName, exe | sort count desc"),
+            Preset(title: String(localized: "Команды из историй оболочек"), query: "Action = shell_command | group by SubjectUserName, CommandLine"),
             Preset(title: String(localized: "Задания cron"), query: "Action = cron_command | group by SubjectUserName, CommandLine"),
+            Preset(title: String(localized: "Скачивание и запуск из /tmp, /dev/shm"), query: "Action = process_exec and (CommandLine contains /tmp/ or CommandLine contains /dev/shm/ or CommandLine contains wget or CommandLine contains curl)"),
+        ]),
+        (String(localized: "Веб-серверы"), [
+            Preset(title: String(localized: "Запросы по адресам"), query: "Action = http_request | group by IpAddress | sort count desc"),
+            Preset(title: String(localized: "Ответы 4xx / 5xx"), query: "Action = http_request and HttpStatus >= 400 | group by HttpStatus, Uri | sort count desc"),
+            Preset(title: String(localized: "POST-запросы"), query: "Action = http_request and HttpMethod = POST | group by Uri, IpAddress | sort count desc"),
+            Preset(title: String(localized: "User-Agent клиентов"), query: "Action = http_request | group by UserAgent | sort count desc"),
+        ]),
+        (String(localized: "Пакеты и базы данных"), [
+            Preset(title: String(localized: "Установка и удаление пакетов (dpkg)"), query: "Action in (package_install, package_upgrade, package_remove, package_purge) | group by Action, PackageName"),
+            Preset(title: String(localized: "Транзакции apt"), query: "Action = apt_transaction"),
+            Preset(title: String(localized: "MySQL: подключения и запросы"), query: "Action in (db_connect, db_query) | group by DbUser, DbCommand"),
+        ]),
+        (String(localized: "Сеть"), [
             Preset(title: String(localized: "Межсетевой экран (журнал ядра)"), query: "Action = firewall | group by SourceIp, DestinationPort, FirewallRule"),
         ]),
         (String(localized: "Качество данных"), [
             Preset(title: String(localized: "Строки, которые не удалось разобрать"), query: "flag = unparsed"),
             Preset(title: String(localized: "Время с восстановленным годом или поясом"), query: "flag in (yearInferred, zoneAssumed) | group by channel"),
+            Preset(title: String(localized: "Записи без своего времени"), query: "flag in (timeCarried, timeFromFile) | group by channel"),
         ]),
     ]
 
