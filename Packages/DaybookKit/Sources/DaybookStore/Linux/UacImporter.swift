@@ -45,7 +45,7 @@ public final class UacImporter: @unchecked Sendable {
         return summary
     }
 
-    private struct FileResult {
+    fileprivate struct FileResult {
         var jobs: [LinuxJob] = []
         var keys: [[RecordKey]] = []
         var format: String
@@ -101,6 +101,13 @@ public final class UacImporter: @unchecked Sendable {
                 if let data = contents.content(job.source, url: plan.url) {
                     switch plan.kind {
                     case .text: records = LinuxText.records(plan, data: data, job: job)
+                    case .journal:
+                        if let jf = JournalFile(data) {
+                            jf.forEachEntry(from: job.bytes.lowerBound, to: job.bytes.upperBound) { e in
+                                records.append(JournalRecords.record(jf, e, plan: plan))
+                                return true
+                            }
+                        }
                     default: records = LinuxBinary.events(plan, data: data, src: job.source,
                                                           users: users[plan.collection], records: true).records
                     }
@@ -147,9 +154,7 @@ public final class UacImporter: @unchecked Sendable {
     private static func scan(_ p: LinuxSourcePlan, src: Int, users: [Int: String]) -> FileResult {
         switch p.kind {
         case let .unsupported(name):
-            let note = name == "journal" ? String(localized: "журнал systemd (journald): разбор пока не поддерживается")
-                                         : String(localized: "формат \(name) пока не поддерживается")
-            return FileResult(format: name, notes: [note])
+            return FileResult(format: name, notes: [String(localized: "формат \(name) пока не поддерживается")])
         default: break
         }
         if p.size == 0 { return FileResult(format: "empty", notes: [String(localized: "пустой файл")]) }
@@ -188,6 +193,8 @@ public final class UacImporter: @unchecked Sendable {
             }
             r.notes = notes
             return r
+        case .journal:
+            return scanJournal(p, data: data, src: src, notes: notes)
         default:
             let e = LinuxBinary.events(p, data: data, src: src, users: users, records: false)
             let job = LinuxJob(source: src, bytes: 0..<data.count, firstLine: 1)
@@ -204,6 +211,41 @@ public final class UacImporter: @unchecked Sendable {
             r.notes = notes
             return r
         }
+    }
+}
+
+extension UacImporter {
+    /// Pass 1 of a journal file: one key per entry, jobs of `recordsPerJob` entries.
+    fileprivate static func scanJournal(_ p: LinuxSourcePlan, data: Data, src: Int, notes: [String]) -> FileResult {
+        var notes = notes
+        guard let jf = JournalFile(data) else {
+            return FileResult(format: "journal", notes: notes + [String(localized: "нет сигнатуры журнала systemd (LPKSHHRH) — файл не разобран")])
+        }
+        var jobs: [LinuxJob] = [], keys: [[RecordKey]] = [], current: [RecordKey] = []
+        var job = LinuxJob(source: src, bytes: jf.headerSize..<jf.arenaEnd, firstLine: 1, formatName: "journal")
+        jf.forEachEntry { e in
+            if current.count >= LinuxText.recordsPerJob {
+                job.bytes = job.bytes.lowerBound..<e.offset
+                jobs.append(job)
+                keys.append(current)
+                current = []
+                job = LinuxJob(source: src, bytes: e.offset..<jf.arenaEnd, firstLine: 1, formatName: "journal")
+            }
+            current.append(RecordKey(ts: JournalRecords.ticks(e), computer: p.host, channel: p.channel, rid: e.seqnum, eid: 0,
+                                     src: src, chunk: 0, off: e.offset, flags: []))
+            return true
+        }
+        jobs.append(job)
+        keys.append(current)
+        let found = keys.reduce(0) { $0 + $1.count }
+        if jf.state == 1 { notes.append(String(localized: "файл не был закрыт (состояние online): прочитаны все записи, найденные в файле")) }
+        if UInt64(found) != jf.entryCount {
+            notes.append(String(localized: "записей по заголовку: \(jf.entryCount), найдено в файле: \(found)"))
+        }
+        if jf.incompatible & 0x08 != 0 { notes.append(String(localized: "значения сжаты zstd")) }
+        var r = FileResult(jobs: jobs, keys: keys, format: "journal")
+        r.notes = notes
+        return r
     }
 }
 

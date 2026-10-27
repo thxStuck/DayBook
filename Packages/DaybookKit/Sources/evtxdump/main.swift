@@ -281,8 +281,10 @@ func query(_ args: [String]) {
         if let first = rows.first {
             t = Date()
             let d = try store.detail(first.id)
-            print(String(format: "detail: %.1f ms, xml %d chars, raw %d bytes, dups %d", Date().timeIntervalSince(t) * 1000,
-                         d?.xml?.count ?? 0, d?.raw?.count ?? 0, d?.duplicates.count ?? 0))
+            print(String(format: "detail: %.1f ms, xml %d chars, text %d chars, raw %d bytes, dups %d", Date().timeIntervalSince(t) * 1000,
+                         d?.xml?.count ?? 0, d?.text?.count ?? 0, d?.raw?.count ?? 0, d?.duplicates.count ?? 0))
+            if let d { print("source: \(d.sourceState)") }
+            if let text = d?.text { print(text.prefix(600)) }
         }
     } catch {
         fail("query failed: \(error)")

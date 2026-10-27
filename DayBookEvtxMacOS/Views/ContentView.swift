@@ -189,7 +189,7 @@ struct ImportOptionsSheet: View {
                 option($runDetections, "Запустить Sigma-детекты после импорта",
                        "Правила SigmaHQ и Hayabusa из поставки (DRL 1.1) и папка своих правил, если выбрана. Идёт в фоне после открытия кейса; результаты сохраняются в кейсе, их можно перезапустить на экране «Детекты».")
             } else {
-                Text("Папка считается распакованным сбором UAC (Unix-like Artifacts Collector): журналы берутся из [root]/var/log, истории оболочек — из домашних папок, сведения о системе — из uac.log. Разбираются syslog (auth.log, syslog, kern.log…), auditd, журналы веб-серверов (access, JSON, error), dpkg и apt, общий журнал MySQL, журналы вида «время + текст», wtmp, btmp, utmp, lastlog и истории bash, zsh, fish — включая ротации .gz и .xz. Файлы, которые не разобраны, тоже попадают в список источников с причиной.")
+                Text("Папка считается распакованным сбором UAC (Unix-like Artifacts Collector): журналы берутся из [root]/var/log, истории оболочек — из домашних папок, сведения о системе — из uac.log. Разбираются syslog (auth.log, syslog, kern.log…), журналы systemd (journald, включая сжатие zstd), auditd, журналы веб-серверов (access, JSON, error), dpkg и apt, общий журнал MySQL, журналы вида «время + текст», wtmp, btmp, utmp, lastlog и истории bash, zsh, fish — включая ротации .gz и .xz. Файлы, которые не разобраны, тоже попадают в список источников с причиной.")
                     .font(.callout)
                     .fixedSize(horizontal: false, vertical: true)
                 option($hashSources, "Считать SHA-256 исходных файлов",

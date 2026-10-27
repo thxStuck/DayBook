@@ -23,6 +23,21 @@ extension CaseStore {
             d.raw = Array(data[offset..<(offset + UtmpRecord.size)])
             d.text = r.fields(host: info.host ?? detail.row.computer, failed: info.format == "btmp")
                 .map { "\($0.name): \($0.value)" }.joined(separator: "\n")
+        case "journal":
+            guard let jf = JournalFile(data), let o = jf.object(at: offset), o.type == 3 else {
+                d.sourceState = .recordMismatch
+                return d
+            }
+            var entry: JournalFile.Entry?
+            jf.forEachEntry(from: offset, to: offset + 1) { entry = $0; return false }
+            guard let e = entry, e.seqnum == detail.row.recordId else {
+                d.sourceState = .recordMismatch
+                return d
+            }
+            d.raw = Array(data[offset..<(offset + o.size)])
+            let f = JournalRecords.fields(jf, e)
+            d.text = (["__SEQNUM=\(e.seqnum)", "__REALTIME_TIMESTAMP=\(e.realtime)", "__MONOTONIC_TIMESTAMP=\(e.monotonic)",
+                       "_BOOT_ID=\(e.bootId)"] + f.pairs.map { "\($0.0)=\($0.1)" }).joined(separator: "\n")
         case "lastlog":
             guard offset + LastlogRecord.size <= data.count else {
                 d.sourceState = .recordMismatch
@@ -67,10 +82,21 @@ extension CaseStore {
             let lastStart = last?.offset ?? offset
             let end = data[lastStart...].firstIndex(of: 0x0A) ?? data.count
             d.raw = Array(data[offset..<end])
-            d.text = record?.text ?? ""
+            d.text = Self.visibleControls(record?.text ?? "")
         }
         d.sourceState = .loaded
         return d
+    }
+
+    /// Control characters other than tab and line feed as their visible symbols (auditd separates
+    /// the interpreted values with 0x1D, ␝); the Hex view keeps the bytes.
+    static func visibleControls(_ s: String) -> String {
+        guard s.unicodeScalars.contains(where: { $0.value < 0x20 && $0 != "\n" && $0 != "\t" }) else { return s }
+        var out = String.UnicodeScalarView()
+        for c in s.unicodeScalars {
+            if c.value < 0x20, c != "\n", c != "\t", let v = Unicode.Scalar(0x2400 + c.value) { out.append(v) } else { out.append(c) }
+        }
+        return String(out)
     }
 
     /// Unpacked content of a source, cached for the last few files.

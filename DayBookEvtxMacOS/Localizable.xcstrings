@@ -4116,12 +4116,12 @@
         }
       }
     },
-    "Папка считается распакованным сбором UAC (Unix-like Artifacts Collector): журналы берутся из [root]/var/log, истории оболочек — из домашних папок, сведения о системе — из uac.log. Разбираются syslog (auth.log, syslog, kern.log…), auditd, журналы веб-серверов (access, JSON, error), dpkg и apt, общий журнал MySQL, журналы вида «время + текст», wtmp, btmp, utmp, lastlog и истории bash, zsh, fish — включая ротации .gz и .xz. Файлы, которые не разобраны, тоже попадают в список источников с причиной.": {
+    "Папка считается распакованным сбором UAC (Unix-like Artifacts Collector): журналы берутся из [root]/var/log, истории оболочек — из домашних папок, сведения о системе — из uac.log. Разбираются syslog (auth.log, syslog, kern.log…), журналы systemd (journald, включая сжатие zstd), auditd, журналы веб-серверов (access, JSON, error), dpkg и apt, общий журнал MySQL, журналы вида «время + текст», wtmp, btmp, utmp, lastlog и истории bash, zsh, fish — включая ротации .gz и .xz. Файлы, которые не разобраны, тоже попадают в список источников с причиной.": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The folder is read as an extracted UAC (Unix-like Artifacts Collector) collection: logs come from [root]/var/log, shell histories from the home folders, system details from uac.log. Parsed: syslog (auth.log, syslog, kern.log…), auditd, web server logs (access, JSON, error), dpkg and apt, the MySQL general log, \"time + text\" logs, wtmp, btmp, utmp, lastlog and bash, zsh and fish histories — including .gz and .xz rotations. Files that are not parsed are listed as sources too, with the reason."
+            "value": "The folder is read as an extracted UAC (Unix-like Artifacts Collector) collection: logs come from [root]/var/log, shell histories from the home folders, system details from uac.log. Parsed: syslog (auth.log, syslog, kern.log…), systemd journals (journald, including zstd compression), auditd, web server logs (access, JSON, error), dpkg and apt, the MySQL general log, \"time + text\" logs, wtmp, btmp, utmp, lastlog and bash, zsh and fish histories — including .gz and .xz rotations. Files that are not parsed are listed as sources too, with the reason."
           }
         }
       }
@@ -6881,16 +6881,6 @@
         }
       }
     },
-    "журнал systemd (journald): разбор пока не поддерживается": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "systemd journal (journald): not parsed yet"
-          }
-        }
-      }
-    },
     "загрузка правил…": {
       "localizations": {
         "en": {
@@ -6901,12 +6891,38 @@
         }
       }
     },
+    "записей по заголовку: %llu, найдено в файле: %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "entries according to the header: %llu, found in the file: %lld"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "new",
+            "value": "записей по заголовку: %1$llu, найдено в файле: %2$lld"
+          }
+        }
+      }
+    },
     "записей с недопустимым типом или временем, а также неполных: %lld": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "records with an invalid type or time, or incomplete: %lld"
+          }
+        }
+      }
+    },
+    "значения сжаты zstd": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "values compressed with zstd"
           }
         }
       }
@@ -7303,6 +7319,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "missing “)” in condition"
+          }
+        }
+      }
+    },
+    "нет сигнатуры журнала systemd (LPKSHHRH) — файл не разобран": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "no systemd journal signature (LPKSHHRH) — file not parsed"
           }
         }
       }
@@ -7937,6 +7963,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "account disabled or locked out"
+          }
+        }
+      }
+    },
+    "файл не был закрыт (состояние online): прочитаны все записи, найденные в файле": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "the file was not closed (state online): every entry found in the file was read"
           }
         }
       }

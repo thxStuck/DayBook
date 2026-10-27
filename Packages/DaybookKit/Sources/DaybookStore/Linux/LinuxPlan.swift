@@ -2,7 +2,7 @@ import Foundation
 
 /// A file of a collection that becomes a source of the case, parsed or not.
 struct LinuxSourcePlan {
-    enum Kind: Equatable { case text, wtmp, btmp, utmp, lastlog, unsupported(String) }
+    enum Kind: Equatable { case text, wtmp, btmp, utmp, lastlog, journal, unsupported(String) }
 
     var url: URL
     /// Path on the analysed system (`/var/log/auth.log.1`).
@@ -34,9 +34,7 @@ enum LinuxPlan {
 
     static func kind(originalPath: String, channel: String) -> LinuxSourcePlan.Kind {
         let base = (channel as NSString).lastPathComponent
-        if originalPath.hasPrefix("/var/log/journal/") || originalPath.hasSuffix(".journal") || originalPath.hasSuffix(".journal~") {
-            return .unsupported("journal")
-        }
+        if originalPath.hasSuffix(".journal") || originalPath.hasSuffix(".journal~") { return .journal }
         switch base {
         case "wtmp": return .wtmp
         case "btmp": return .btmp
@@ -93,7 +91,8 @@ enum LinuxPlan {
                 let original = String(full.dropFirst(rootPath.count))
                 let relative = original.hasPrefix("/var/log/") ? String(original.dropFirst("/var/log/".count))
                                                                : (original as NSString).lastPathComponent
-                var channel = logName(relative)
+                var channel = original.hasSuffix(".journal") || original.hasSuffix(".journal~")
+                    ? JournalRecords.channel(original) : logName(relative)
                 if ShellHistoryFormat.kind(of: original) != nil {
                     channel = channel.hasPrefix(".") ? String(channel.dropFirst()) : channel   // ".bash_history" → "bash_history"
                 }
