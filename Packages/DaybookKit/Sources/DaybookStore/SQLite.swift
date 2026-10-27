@@ -117,6 +117,8 @@ public final class Statement {
         return self
     }
     @discardableResult
+    public func bind(_ i: Int32, _ v: Int?) -> Statement { bind(i, v.map { Int64($0) }) }
+    @discardableResult
     public func bind(_ i: Int32, blob: [UInt8]) -> Statement {
         blob.withUnsafeBytes { p in
             _ = sqlite3_bind_blob(stmt, i, p.baseAddress ?? UnsafeRawPointer(bitPattern: 1), Int32(p.count), SQLITE_TRANSIENT)

@@ -261,7 +261,7 @@ public final class EntityBuilder {
                 }
                 let aliases = spellings[e].keys.filter { $0 != display }.sorted()
                 let aliasJSON = String(data: try JSONSerialization.data(withJSONObject: aliases), encoding: .utf8) ?? "[]"
-                let roleJSON = String(data: try JSONSerialization.data(withJSONObject: roles), encoding: .utf8) ?? "{}"
+                let roleJSON = String(data: try JSONSerialization.data(withJSONObject: roles, options: .sortedKeys), encoding: .utf8) ?? "{}"
                 try insE.bind(1, e).bind(2, kinds[e].rawValue).bind(3, keys[e]).bind(4, display)
                     .bind(5, domains[e].map { $0 } ?? "").bind(6, sids[e] ?? "").bind(7, aliasJSON)
                     .bind(8, store.timestamp(first)).bind(9, store.timestamp(last)).bind(10, unique.count)

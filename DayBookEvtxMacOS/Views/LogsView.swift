@@ -17,9 +17,10 @@ struct LogTreeSections: View {
 
     static let windowsLogs = ["application", "security", "setup", "system", "forwardedevents"]
 
-    /// Channel name from the file name (Windows stores "A/B" as "A%4B.evtx").
+    /// Channel name from the file name (Windows stores "A/B" as "A%4B.evtx"); other formats store it.
     static func channel(_ s: SourceInfo) -> String {
-        URL(fileURLWithPath: s.path).deletingPathExtension().lastPathComponent.replacingOccurrences(of: "%4", with: "/")
+        if !s.isEvtx { return s.channel ?? s.name }
+        return URL(fileURLWithPath: s.path).deletingPathExtension().lastPathComponent.replacingOccurrences(of: "%4", with: "/")
     }
 
     static func logs(_ sources: [SourceInfo]) -> [Log] {
@@ -28,6 +29,50 @@ struct LogTreeSections: View {
     }
 
     var body: some View {
+        if model.isLinux { linuxBody } else { windowsBody }
+    }
+
+    /// Linux: logs of /var/log by name; a log with rotations opens whole, its files one by one inside.
+    @ViewBuilder private var linuxBody: some View {
+        let viewer = model.logViewer
+        let all = Self.logs(model.store.sources).filter { !hideEmpty || $0.events > 0 }
+        let byChannel = Dictionary(grouping: all, by: \.channel)
+        Section {
+            ForEach(byChannel.keys.sorted { $0.localizedStandardCompare($1) == .orderedAscending }, id: \.self) { channel in
+                let files = (byChannel[channel] ?? []).sorted { $0.source.name.localizedStandardCompare($1.source.name) == .orderedAscending }
+                if files.count == 1, let log = files.first {
+                    row(log, title: channel, viewer: viewer, duplicated: [])
+                } else {
+                    DisclosureGroup {
+                        ForEach(files) { row($0, title: URL(fileURLWithPath: $0.source.path).lastPathComponent, viewer: viewer, duplicated: []) }
+                    } label: {
+                        let selected = viewer.viewerLog == CaseModel.channelPrefix + channel
+                        HStack {
+                            Text(channel).lineLimit(1).truncationMode(.middle)
+                            Spacer(minLength: 4)
+                            Text(files.reduce(0) { $0 + $1.events }.formatted())
+                                .font(.caption.monospacedDigit()).foregroundStyle(.secondary)
+                        }
+                        .contentShape(Rectangle())
+                        .fontWeight(selected ? .semibold : .regular)
+                        .onTapGesture { viewer.showChannel(channel, query: viewer.queryText) }
+                        .help(String(localized: "Журнал целиком: \(files.count) файлов с ротациями"))
+                    }
+                }
+            }
+        } header: {
+            HStack {
+                Text("Журналы /var/log")
+                Spacer()
+                Toggle("Без пустых", isOn: $hideEmpty)
+                    .toggleStyle(.checkbox)
+                    .controlSize(.mini)
+                    .help("Скрыть журналы без событий (файлы остаются в кейсе и в сведениях о кейсе)")
+            }
+        }
+    }
+
+    @ViewBuilder private var windowsBody: some View {
         let viewer = model.logViewer
         let all = Self.logs(model.store.sources)
         let duplicated = Set(Dictionary(grouping: all, by: { $0.channel.lowercased() }).filter { $0.value.count > 1 }.keys)
@@ -119,7 +164,23 @@ struct LogsView: View {
     var body: some View {
         let v = model.logViewer
         VStack(spacing: 0) {
-            if let label = v.viewerLog, let src = model.store.sources.first(where: { $0.name == label }) {
+            if let label = v.viewerLog, label.hasPrefix(CaseModel.channelPrefix) {
+                let channel = String(label.dropFirst(CaseModel.channelPrefix.count))
+                channelHeader(v, channel, model.store.sources.filter { !$0.isEvtx && $0.channel == channel })
+                Divider()
+                FilterBar(model: v, showsReset: false)
+                Divider()
+                GeometryReader { geo in
+                    let h = min(max(detailHeight, 120), max(120, geo.size.height - 140))
+                    VStack(spacing: 0) {
+                        FlexibleTable {
+                            EventTable(model: v, generation: v.generation, displayGeneration: v.displayGeneration, columns: v.columns)
+                        }
+                        RowSplitHandle(height: $detailHeight, range: 120...1200)
+                        DetailView(model: v).frame(height: h)
+                    }
+                }
+            } else if let label = v.viewerLog, let src = model.store.sources.first(where: { $0.name == label }) {
                 header(v, src)
                 Divider()
                 FilterBar(model: v, showsReset: false)
@@ -144,8 +205,52 @@ struct LogsView: View {
         .onAppear {
             guard v.viewerLog == nil else { return }
             let logs = LogTreeSections.logs(model.store.sources).filter { $0.events > 0 }
-            if let first = logs.first(where: { $0.channel.lowercased() == "security" }) ?? logs.first {
+            if model.isLinux {
+                if let first = logs.first(where: { $0.channel == "auth.log" || $0.channel == "secure" }) ?? logs.first {
+                    v.showChannel(first.channel)
+                }
+            } else if let first = logs.first(where: { $0.channel.lowercased() == "security" }) ?? logs.first {
                 v.showLog(first.source.name)
+            }
+        }
+    }
+
+    /// A whole Linux log: its files (rotations) and how much of them was parsed.
+    private func channelHeader(_ v: CaseModel, _ channel: String, _ files: [SourceInfo]) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(alignment: .firstTextBaseline) {
+                Text(channel).font(.headline).lineLimit(1).truncationMode(.middle).textSelection(.enabled)
+                Text("\(files.reduce(0) { $0 + $1.records }.formatted()) записей · файлов: \(files.count)")
+                    .font(.callout).foregroundStyle(.secondary)
+                Spacer(minLength: 8)
+                Button("Открыть в «Событиях»") { model.showChannelInEvents(channel, query: v.queryText) }
+                    .help("Новый поиск в разделе «События»: этот журнал с тем же фильтром DQL")
+            }
+            ForEach(files) { f in
+                Text("\(f.path) · \(f.records.formatted())\(f.note.map { " · " + $0 } ?? "")")
+                    .font(.caption).foregroundStyle(.secondary).lineLimit(1).truncationMode(.middle).textSelection(.enabled)
+            }
+            linuxFilterRow(v)
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 8)
+    }
+
+    private func linuxFilterRow(_ v: CaseModel) -> some View {
+        HStack(spacing: 6) {
+            TextField("Фильтр DQL, например Action = auth_failure", text: $filterText)
+                .textFieldStyle(.roundedBorder)
+                .frame(minWidth: 160, maxWidth: 420)
+                .onSubmit { apply(v) }
+            if !filterText.isEmpty {
+                Button("Сбросить") {
+                    filterText = ""
+                    apply(v)
+                }
+                .buttonStyle(.borderless)
+            }
+            if let e = v.queryError {
+                Text(e).font(.caption).foregroundStyle(.red).textSelection(.enabled)
             }
         }
     }
@@ -161,7 +266,10 @@ struct LogsView: View {
                 Button("Открыть в «Событиях»") { model.showSource(src.name, query: v.queryText) }
                     .help("Новый поиск в разделе «События»: этот журнал с теми же уровнями и фильтром DQL")
             }
-            Text(src.path).font(.caption).foregroundStyle(.secondary).lineLimit(1).truncationMode(.middle).textSelection(.enabled)
+            Text(src.path + (src.note.map { " · " + $0 } ?? "")).font(.caption).foregroundStyle(.secondary).lineLimit(1).truncationMode(.middle).textSelection(.enabled)
+            if !src.isEvtx {
+                linuxFilterRow(v)
+            } else {
             HStack(spacing: 6) {
                 ForEach(Self.levelNames, id: \.0) { level, name in
                     chip(name, on: levels.contains(level)) {
@@ -194,6 +302,7 @@ struct LogsView: View {
             }
             if let e = v.queryError {
                 Text(e).font(.caption).foregroundStyle(.red).textSelection(.enabled)
+            }
             }
         }
         .padding(.horizontal, 10)

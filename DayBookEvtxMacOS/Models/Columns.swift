@@ -70,6 +70,31 @@ struct ColumnSpec: Identifiable, Hashable {
         ColumnSpec(kind: .summary, width: 640),
     ]
 
+    /// Linux: no event ids; the program that wrote the line instead.
+    static let linux: [ColumnSpec] = [
+        ColumnSpec(kind: .time, width: 175),
+        ColumnSpec(kind: .computer, width: 130),
+        ColumnSpec(kind: .channel, width: 150),
+        ColumnSpec(kind: .provider, width: 150),
+        ColumnSpec(kind: .summary, width: 720),
+    ]
+
+    static let linuxViewer: [ColumnSpec] = [
+        ColumnSpec(kind: .time, width: 175),
+        ColumnSpec(kind: .provider, width: 170),
+        ColumnSpec(kind: .computer, width: 130),
+        ColumnSpec(kind: .summary, width: 760),
+    ]
+
+    static let linuxTimeline: [ColumnSpec] = [
+        ColumnSpec(kind: .time, width: 190),
+        ColumnSpec(kind: .channel, width: 150),
+        ColumnSpec(kind: .computer, width: 130),
+        ColumnSpec(kind: .actor, width: 150),
+        ColumnSpec(kind: .provider, width: 140),
+        ColumnSpec(kind: .summary, width: 760),
+    ]
+
     static let timeline: [ColumnSpec] = [
         ColumnSpec(kind: .time, width: 190),
         ColumnSpec(kind: .channel, width: 200),
@@ -108,9 +133,14 @@ enum EventText {
         if f.contains(.timeSkew) { out.append(String(localized: "TimeCreated ≠ время записи")) }
         if f.contains(.foreignTemplate) { out.append(String(localized: "шаблон из другого чанка")) }
         if f.contains(.missingTemplate) { out.append(String(localized: "шаблон не найден")) }
-        if f.contains(.invalidText) { out.append(String(localized: "некорректный UTF-16")) }
+        if f.contains(.invalidText) { out.append(String(localized: "некорректные символы в тексте")) }
         if f.contains(.duplicate) { out.append(String(localized: "есть копии в других файлах/slack (см. «Копии этой записи»)")) }
         if f.contains(.sizeMismatch) { out.append(String(localized: "копия размера записи не совпадает")) }
+        if f.contains(.yearInferred) { out.append(String(localized: "года в строке нет — восстановлен по дате файла")) }
+        if f.contains(.zoneAssumed) { out.append(String(localized: "пояса в строке нет — принят пояс системы из сбора")) }
+        if f.contains(.timeFromFile) { out.append(String(localized: "своего времени нет — время изменения файла")) }
+        if f.contains(.notDecompressed) { out.append(String(localized: "сжатое значение не распаковано")) }
+        if f.contains(.unparsed) { out.append(String(localized: "строка не разобрана — время предыдущей строки")) }
         return out
     }
 }

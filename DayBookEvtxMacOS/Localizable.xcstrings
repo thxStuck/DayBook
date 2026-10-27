@@ -121,11 +121,49 @@
       },
       "shouldTranslate": false
     },
+    "%@ · %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@ · %2$@"
+          }
+        }
+      },
+      "shouldTranslate": false
+    },
+    "%@ · %@%@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@ · %2$@%3$@"
+          }
+        }
+      },
+      "shouldTranslate": false
+    },
     "%@ · chunk %lld · offset %lld": {
       "shouldTranslate": false
     },
     "%@ · id %@": {
       "shouldTranslate": false
+    },
+    "%@ записей · файлов: %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ records · files: %lld"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@ записей · файлов: %2$lld"
+          }
+        }
+      }
     },
     "%@ записей%@": {
       "localizations": {
@@ -459,6 +497,9 @@
         }
       }
     },
+    "DQL: Action = auth_failure | group by IpAddress, TargetUserName": {
+      "shouldTranslate": false
+    },
     "DQL: EventID = 4624 and LogonType = 3 | group by IpAddress, TargetUserName": {
       "shouldTranslate": false
     },
@@ -561,6 +602,16 @@
           "stringUnit": {
             "state": "new",
             "value": "Kerberos TGT для %1$@%2$@%3$@%4$@"
+          }
+        }
+      }
+    },
+    "Linux — сбор UAC": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Linux — UAC collection"
           }
         }
       }
@@ -798,12 +849,58 @@
         }
       }
     },
+    "SHA-256 исходных файлов: %@ · ошибок разбора: %@ · полнотекстовый индекс %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SHA-256 of source files: %@ · parse errors: %@ · full-text index %@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "new",
+            "value": "SHA-256 исходных файлов: %1$@ · ошибок разбора: %2$@ · полнотекстовый индекс %3$@"
+          }
+        }
+      }
+    },
     "SID · другие написания": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "SID · other spellings"
+          }
+        }
+      }
+    },
+    "SSH: неудачные попытки": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SSH: failed attempts"
+          }
+        }
+      }
+    },
+    "SSH: перебор по источнику": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SSH: brute force by source"
+          }
+        }
+      }
+    },
+    "SSH: успешные входы": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SSH: successful logons"
           }
         }
       }
@@ -903,6 +1000,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "WinRM: session creation %@"
+          }
+        }
+      }
+    },
+    "Windows — журналы .evtx": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Windows — .evtx logs"
           }
         }
       }
@@ -1016,6 +1123,29 @@
     },
     "rulelevel = %@": {
       "shouldTranslate": false
+    },
+    "su": {
+      "shouldTranslate": false
+    },
+    "sudo: команды": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "sudo: commands"
+          }
+        }
+      }
+    },
+    "sudo: отказы": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "sudo: denials"
+          }
+        }
+      }
     },
     "wide/utf16le без base64 не поддерживается": {
       "localizations": {
@@ -1290,6 +1420,26 @@
         }
       }
     },
+    "В выбранных источниках нет файлов .evtx.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The chosen sources contain no .evtx files."
+          }
+        }
+      }
+    },
+    "В выбранных папках не найден распакованный сбор UAC: нужна папка [root] и рядом uac.log, live_response или bodyfile": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No extracted UAC collection in the chosen folders: a [root] folder is needed next to uac.log, live_response or bodyfile"
+          }
+        }
+      }
+    },
     "В группу %@ добавлен %@ [%@]": {
       "localizations": {
         "en": {
@@ -1535,12 +1685,32 @@
         }
       }
     },
+    "Время с восстановленным годом или поясом": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Times with an inferred year or zone"
+          }
+        }
+      }
+    },
     "Время событий хранится в UTC (FILETIME, 100 нс); отображение — в выбранном поясе.": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Event times are stored in UTC (FILETIME, 100 ns) and displayed in the selected zone."
+          }
+        }
+      }
+    },
+    "Время событий хранится в UTC; строки без пояса или года пересчитаны из пояса системы и даты файла и помечены флагами. Разобрано — строк или записей с распознанной структурой; пропущено — пустых строк и неполных записей.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Event times are stored in UTC; lines without a zone or year are converted using the system's zone and the file's date and are flagged. Parsed: lines or records with a recognised structure; skipped: empty lines and incomplete records."
           }
         }
       }
@@ -1646,6 +1816,16 @@
         }
       }
     },
+    "Входы и выходы (wtmp)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Logins and logouts (wtmp)"
+          }
+        }
+      }
+    },
     "Входы и учётные записи": {
       "localizations": {
         "en": {
@@ -1666,12 +1846,12 @@
         }
       }
     },
-    "Выберите папку с журналами или файлы .evtx": {
+    "Выберите папку с журналами (.evtx) или распакованный сбор UAC": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Choose a logs folder or .evtx files"
+            "value": "Choose a folder with logs (.evtx) or an extracted UAC collection"
           }
         }
       }
@@ -1742,6 +1922,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Execution and persistence"
+          }
+        }
+      }
+    },
+    "Выполнение и сеть": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Execution and network"
           }
         }
       }
@@ -1838,6 +2028,16 @@
         }
       }
     },
+    "Действия": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Actions"
+          }
+        }
+      }
+    },
     "Детали": {
       "localizations": {
         "en": {
@@ -1894,6 +2094,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Duration"
+          }
+        }
+      }
+    },
+    "Для Linux выберите распакованный сбор UAC (архив .tar.gz сначала распакуйте).": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "For Linux, choose an extracted UAC collection (extract the .tar.gz archive first)."
           }
         }
       }
@@ -2064,12 +2274,32 @@
         }
       }
     },
+    "Журнал целиком: %lld файлов с ротациями": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The whole log: %lld files with rotations"
+          }
+        }
+      }
+    },
     "Журналы": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Logs"
+          }
+        }
+      }
+    },
+    "Журналы /var/log": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Logs in /var/log"
           }
         }
       }
@@ -2170,6 +2400,26 @@
         }
       }
     },
+    "Загрузки и выключения": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Boots and shutdowns"
+          }
+        }
+      }
+    },
+    "Задания cron": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "cron jobs"
+          }
+        }
+      }
+    },
     "Закладка": {
       "localizations": {
         "en": {
@@ -2236,6 +2486,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Note"
+          }
+        }
+      }
+    },
+    "Запись": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Record"
+          }
+        }
+      }
+    },
+    "Запись не прочитана повторно: файл изменился во время импорта": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The record was not read again: the file changed during import"
           }
         }
       }
@@ -2780,6 +3050,16 @@
         }
       }
     },
+    "Качество данных": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Data quality"
+          }
+        }
+      }
+    },
     "Кейс": {
       "localizations": {
         "en": {
@@ -3032,6 +3312,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Any level"
+          }
+        }
+      }
+    },
+    "Межсетевой экран (журнал ядра)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Firewall (kernel log)"
           }
         }
       }
@@ -3292,6 +3582,16 @@
         }
       }
     },
+    "Неудачные входы (btmp)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Failed logins (btmp)"
+          }
+        }
+      }
+    },
     "Неудачный вход %@ (тип %@%@)%@: %@": {
       "localizations": {
         "en": {
@@ -3328,12 +3628,42 @@
         }
       }
     },
+    "Новый поиск в разделе «События»: этот журнал с тем же фильтром DQL": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New search in Events: this log with the same DQL filter"
+          }
+        }
+      }
+    },
     "Новый поиск в разделе «События»: этот журнал с теми же уровнями и фильтром DQL": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "New search in Events: this log with the same levels and DQL filter"
+          }
+        }
+      }
+    },
+    "Номер записи": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Record number"
+          }
+        }
+      }
+    },
+    "Номер строки": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Line number"
           }
         }
       }
@@ -3460,6 +3790,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Description / event data"
+          }
+        }
+      }
+    },
+    "Определяю содержимое папок…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Checking the folders…"
           }
         }
       }
@@ -3676,6 +4016,16 @@
         }
       }
     },
+    "Папка считается распакованным сбором UAC (Unix-like Artifacts Collector): журналы берутся из [root]/var/log, сведения о системе — из uac.log. Разбираются журналы в формате syslog (auth.log, syslog, kern.log и другие, включая ротации .gz и .xz) и записи входов wtmp, btmp, utmp, lastlog. Остальные файлы /var/log тоже попадают в список источников с причиной, по которой они не разобраны.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The folder is read as an extracted UAC (Unix-like Artifacts Collector) collection: logs come from [root]/var/log, system details from uac.log. Logs in syslog format (auth.log, syslog, kern.log and others, including .gz and .xz rotations) and the login records wtmp, btmp, utmp and lastlog are parsed. The other files of /var/log are listed as sources too, with the reason they were not parsed."
+          }
+        }
+      }
+    },
     "Параметры импорта": {
       "localizations": {
         "en": {
@@ -3778,6 +4128,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "A different record is at the stored position: the file changed after import."
+          }
+        }
+      }
+    },
+    "Повышение привилегий": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Privilege escalation"
           }
         }
       }
@@ -4235,6 +4595,16 @@
         }
       }
     },
+    "Примечание": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Note"
+          }
+        }
+      }
+    },
     "Проверка доступа: %@\\%@%@ [%@]": {
       "localizations": {
         "en": {
@@ -4261,6 +4631,26 @@
         }
       }
     },
+    "Программа": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Program"
+          }
+        }
+      }
+    },
+    "Программы": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Programs"
+          }
+        }
+      }
+    },
     "Продлён билет Kerberos %@ для %@": {
       "localizations": {
         "en": {
@@ -4277,12 +4667,22 @@
         }
       }
     },
-    "Просмотр и анализ журналов Windows (.evtx) на macOS": {
+    "Пропущено": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Windows event log (.evtx) viewer and analyzer for macOS"
+            "value": "Skipped"
+          }
+        }
+      }
+    },
+    "Просмотр и анализ журналов Windows (.evtx) и сборов Linux (UAC) на macOS": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Viewing and analysis of Windows logs (.evtx) and Linux collections (UAC) on macOS"
           }
         }
       }
@@ -4415,6 +4815,16 @@
         }
       }
     },
+    "Разобрано": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parsed"
+          }
+        }
+      }
+    },
     "Реестр %@: %@%@ (%@)": {
       "localizations": {
         "en": {
@@ -4457,6 +4867,48 @@
           "stringUnit": {
             "state": "translated",
             "value": "Roles"
+          }
+        }
+      }
+    },
+    "Сбор UAC %@: %@ · %@ %@ · пояс %@ · %@ — %@ · ошибок в uac.log: %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "UAC %@ collection: %@ · %@ %@ · zone %@ · %@ — %@ · errors in uac.log: %lld"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Сбор UAC %1$@: %2$@ · %3$@ %4$@ · пояс %5$@ · %6$@ — %7$@ · ошибок в uac.log: %8$lld"
+          }
+        }
+      }
+    },
+    "Сбор UAC не найден (нужна папка [root] и рядом uac.log, live_response или bodyfile).": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No UAC collection found (a [root] folder is needed next to uac.log, live_response or bodyfile)."
+          }
+        }
+      }
+    },
+    "Сбор UAC: %@ · UAC %@ · %@ · пояс %@ · %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "UAC collection: %@ · UAC %@ · %@ · zone %@ · %@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Сбор UAC: %1$@ · UAC %2$@ · %3$@ · пояс %4$@ · %5$@"
           }
         }
       }
@@ -4665,6 +5117,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "System"
+          }
+        }
+      }
+    },
+    "Система:": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "System:"
           }
         }
       }
@@ -4887,6 +5349,22 @@
           "stringUnit": {
             "state": "new",
             "value": "Событий в кейсе: %1$@ · файлов: %2$lld · создан: %3$@ · схема %4$@"
+          }
+        }
+      }
+    },
+    "Событий в кейсе: %@ · файлов: %lld, из них с событиями: %lld · создан: %@ · схема %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Events in the case: %@ · files: %lld, with events: %lld · created: %@ · schema %@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Событий в кейсе: %1$@ · файлов: %2$lld, из них с событиями: %3$lld · создан: %4$@ · схема %5$@"
           }
         }
       }
@@ -5282,6 +5760,16 @@
         }
       }
     },
+    "Строки, которые не удалось разобрать": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lines that could not be parsed"
+          }
+        }
+      }
+    },
     "Считать SHA-256 исходных файлов": {
       "localizations": {
         "en": {
@@ -5329,6 +5817,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Type"
+          }
+        }
+      }
+    },
+    "Тип записи (ut_type)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Record type (ut_type)"
           }
         }
       }
@@ -5571,6 +6069,16 @@
         }
       }
     },
+    "Учётные записи и группы": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accounts and groups"
+          }
+        }
+      }
+    },
     "Файл": {
       "localizations": {
         "en": {
@@ -5587,6 +6095,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "The file has not responded for more than 3 seconds: a network share is unavailable, a disk is asleep, or macOS is waiting for permission to access the folder."
+          }
+        }
+      }
+    },
+    "Файлов .evtx: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": ".evtx files: %@"
           }
         }
       }
@@ -5617,6 +6135,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Filter  = value"
+          }
+        }
+      }
+    },
+    "Фильтр DQL, например Action = auth_failure": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DQL filter, e.g. Action = auth_failure"
           }
         }
       }
@@ -5723,6 +6251,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Flags: carved, beyondHeader, stale, afterGap, parseError, timeSkew, foreignTemplate"
+          }
+        }
+      }
+    },
+    "Формат": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Format"
           }
         }
       }
@@ -6113,6 +6651,36 @@
         }
       }
     },
+    "год восстановлен по времени изменения копии файла": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "year inferred from the modification time of the file's copy"
+          }
+        }
+      }
+    },
+    "год восстановлен по времени изменения файла из bodyfile": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "year inferred from the file's modification time in the bodyfile"
+          }
+        }
+      }
+    },
+    "года в строке нет — восстановлен по дате файла": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "no year in the line — inferred from the file's date"
+          }
+        }
+      }
+    },
     "группировка": {
       "localizations": {
         "en": {
@@ -6163,12 +6731,32 @@
         }
       }
     },
+    "журнал systemd (journald): разбор пока не поддерживается": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "systemd journal (journald): not parsed yet"
+          }
+        }
+      }
+    },
     "загрузка правил…": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "loading rules…"
+          }
+        }
+      }
+    },
+    "записей с недопустимым типом или временем, а также неполных: %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "records with an invalid type or time, or incomplete: %lld"
           }
         }
       }
@@ -6419,6 +7007,26 @@
         }
       }
     },
+    "не удалось распаковать gzip": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "could not unpack gzip"
+          }
+        }
+      }
+    },
+    "не удалось распаковать xz": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "could not unpack xz"
+          }
+        }
+      }
+    },
     "не указан": {
       "localizations": {
         "en": {
@@ -6459,12 +7067,12 @@
         }
       }
     },
-    "некорректный UTF-16": {
+    "некорректные символы в тексте": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "invalid UTF-16"
+            "value": "invalid characters in the text"
           }
         }
       }
@@ -6767,6 +7375,36 @@
         }
       }
     },
+    "пояс в строках не указан и в сборе не записан: принято UTC": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "no zone in the lines and none recorded in the collection: UTC assumed"
+          }
+        }
+      }
+    },
+    "пояс в строках не указан: принят %@ из uac.log": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "no zone in the lines: %@ from uac.log assumed"
+          }
+        }
+      }
+    },
+    "пояса в строке нет — принят пояс системы из сбора": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "no zone in the line — the system's zone from the collection assumed"
+          }
+        }
+      }
+    },
     "правил: %lld": {
       "localizations": {
         "en": {
@@ -6783,6 +7421,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "previous name"
+          }
+        }
+      }
+    },
+    "пустой файл": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "empty file"
           }
         }
       }
@@ -6853,6 +7501,16 @@
         }
       }
     },
+    "своего времени нет — время изменения файла": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "no time of its own — the file's modification time"
+          }
+        }
+      }
+    },
     "сервер в неверном состоянии": {
       "localizations": {
         "en": {
@@ -6913,6 +7571,26 @@
         }
       }
     },
+    "сжат %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "compressed with %@"
+          }
+        }
+      }
+    },
+    "сжатое значение не распаковано": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "compressed value not unpacked"
+          }
+        }
+      }
+    },
     "слишком много кандидатов: %lld": {
       "localizations": {
         "en": {
@@ -6969,6 +7647,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "account expired"
+          }
+        }
+      }
+    },
+    "строка не разобрана — время предыдущей строки": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "line not parsed — time of the previous line"
           }
         }
       }
@@ -7073,12 +7761,42 @@
         }
       }
     },
+    "файл не читается": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "file cannot be read"
+          }
+        }
+      }
+    },
     "флаги i/m/s допустимы только с re": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "flags i/m/s are allowed only with re"
+          }
+        }
+      }
+    },
+    "формат %@ пока не поддерживается": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "format %@ not supported yet"
+          }
+        }
+      }
+    },
+    "формат строк не распознан — файл не разобран": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "line format not recognised — file not parsed"
           }
         }
       }

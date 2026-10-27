@@ -68,6 +68,32 @@ struct Preset: Identifiable {
 
 /// Ready-made DFIR queries (shown in the sidebar).
 enum Presets {
+    /// Linux (UAC): queries over the normalised `Action` values of auth.log, wtmp/btmp and others.
+    static let linux: [(group: String, items: [Preset])] = [
+        (String(localized: "Входы и учётные записи"), [
+            Preset(title: String(localized: "SSH: успешные входы"), query: "Action = auth_success | group by TargetUserName, IpAddress, AuthMethod"),
+            Preset(title: String(localized: "SSH: неудачные попытки"), query: "Action in (auth_failure, invalid_user, user_not_allowed, too_many_auth_failures) | group by IpAddress, TargetUserName"),
+            Preset(title: String(localized: "SSH: перебор по источнику"), query: "Action in (auth_failure, invalid_user, user_not_allowed) | group by IpAddress | sort count desc"),
+            Preset(title: String(localized: "Неудачные входы (btmp)"), query: "Action = login_failed | group by TargetUserName, IpAddress"),
+            Preset(title: String(localized: "Входы и выходы (wtmp)"), query: "Action in (login, logout) and channel = wtmp"),
+            Preset(title: String(localized: "Загрузки и выключения"), query: "Action in (boot, shutdown, runlevel)"),
+            Preset(title: String(localized: "Учётные записи и группы"), query: "Action in (user_added, user_deleted, user_modified, group_added, group_deleted, group_member_added, group_member_removed, password_changed)"),
+        ]),
+        (String(localized: "Повышение привилегий"), [
+            Preset(title: String(localized: "sudo: команды"), query: "Action = sudo | group by SubjectUserName, TargetUserName, CommandLine"),
+            Preset(title: String(localized: "sudo: отказы"), query: "Action = sudo_denied"),
+            Preset(title: String(localized: "su"), query: "Action in (su, su_failed)"),
+        ]),
+        (String(localized: "Выполнение и сеть"), [
+            Preset(title: String(localized: "Задания cron"), query: "Action = cron_command | group by SubjectUserName, CommandLine"),
+            Preset(title: String(localized: "Межсетевой экран (журнал ядра)"), query: "Action = firewall | group by SourceIp, DestinationPort, FirewallRule"),
+        ]),
+        (String(localized: "Качество данных"), [
+            Preset(title: String(localized: "Строки, которые не удалось разобрать"), query: "flag = unparsed"),
+            Preset(title: String(localized: "Время с восстановленным годом или поясом"), query: "flag in (yearInferred, zoneAssumed) | group by channel"),
+        ]),
+    ]
+
     static let all: [(group: String, items: [Preset])] = [
         (String(localized: "Входы и учётные записи"), [
             Preset(title: String(localized: "Успешные входы (4624)"), query: "EventID = 4624 | group by LogonType, TargetUserName"),

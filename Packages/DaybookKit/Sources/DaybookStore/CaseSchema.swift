@@ -40,7 +40,8 @@ public enum CaseSchema {
         mtime REAL, header_chunks INTEGER, chunks INTEGER, dirty INTEGER, records INTEGER,
         carved INTEGER, duplicates INTEGER, first_ts INTEGER, last_ts INTEGER, error TEXT,
         empty_chunks INTEGER, beyond_new INTEGER, beyond_stale INTEGER, bad_header_crc INTEGER,
-        bad_data_crc INTEGER, trailing_bytes INTEGER, version TEXT);
+        bad_data_crc INTEGER, trailing_bytes INTEGER, version TEXT,
+        format TEXT, channel TEXT, host TEXT, parsed INTEGER, skipped INTEGER, note TEXT);
     CREATE TABLE str(id INTEGER PRIMARY KEY, hl INTEGER NOT NULL, num INTEGER, kind INTEGER NOT NULL, s TEXT NOT NULL);
     CREATE TABLE ev(
         id INTEGER PRIMARY KEY, ts INTEGER NOT NULL, wts INTEGER, src INTEGER, chunk INTEGER, off INTEGER,

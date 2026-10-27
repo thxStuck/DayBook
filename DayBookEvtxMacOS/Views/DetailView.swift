@@ -12,7 +12,8 @@ struct DetailView: View {
             VStack(spacing: 0) {
                 Picker("", selection: $tab) {
                     Text("Поля").tag(0)
-                    Text("XML").tag(1)
+                    // Linux sources have no XML: the original line or the decoded binary record.
+                    if model.isLinux { Text("Запись").tag(1) } else { Text("XML").tag(1) }
                     Text("Hex").tag(2)
                 }
                 .pickerStyle(.segmented)
@@ -23,7 +24,7 @@ struct DetailView: View {
                 case 0:
                     FieldsView(model: model, detail: d)
                 case 1:
-                    if let xml = d.xml { MonoTextView(text: xml) } else { SourceStateView(detail: d) }
+                    if let xml = d.xml ?? d.text { MonoTextView(text: xml) } else { SourceStateView(detail: d) }
                 default:
                     if let raw = d.raw { MonoTextView(text: Self.hexDump(raw)) } else { SourceStateView(detail: d) }
                 }
@@ -228,7 +229,7 @@ struct FieldsContent: View {
         }
         var byName: [String: String] = [:]
         for f in detail.fields where byName[f.key] == nil { byName[f.key] = f.value }
-        if let d = EventDescriber.describe(provider: e.provider, channel: e.channel, eventId: e.eventId, field: { byName[$0] }) {
+        if !model.isLinux, let d = EventDescriber.describe(provider: e.provider, channel: e.channel, eventId: e.eventId, field: { byName[$0] }) {
             add(String(localized: "Описание"), d)
         }
         if let tag = model.tags[e.id] {
@@ -237,19 +238,31 @@ struct FieldsContent: View {
         add(String(localized: "Время") + " (\(model.timeZone.headerLabel(at: e.ts)))", fmt.string(e.ts))
         add(String(localized: "Время UTC"), FileTime.iso8601(e.ts))
         if e.writtenTime != e.ts { add(String(localized: "Время записи (UTC)"), FileTime.iso8601(e.writtenTime)) }
-        add("EventID", String(e.eventId), K.eventId)
-        add(String(localized: "Журнал"), e.channel, K.channel)
-        add(String(localized: "Источник"), e.provider, K.provider)
-        add(String(localized: "Компьютер"), e.computer, K.computer)
-        add(String(localized: "Уровень"), EventText.level(e.level, keywords: e.keywords), K.level, e.level.map(String.init))
-        if let u = e.user { add(String(localized: "Пользователь (SID)"), u, K.user) }
-        add("EventRecordID", String(e.recordId))
-        if let t = e.task { add("Task", String(t), K.task) }
-        if let o = e.opcode { add("Opcode", String(o), K.opcode) }
-        if let k = e.keywords { add("Keywords", "0x" + String(k, radix: 16)) }
-        if let p = e.processId { add("ProcessID / ThreadID", "\(p) / \(e.threadId.map(String.init) ?? "—")") }
-        if e.source < model.store.sources.count {
-            let s = model.store.sources[e.source]
+        let source = e.source < model.store.sources.count ? model.store.sources[e.source] : nil
+        if model.isLinux {
+            // Linux: no event ids or SIDs; the record number is the line (text) or the record (binary).
+            let binary = ["wtmp", "btmp", "utmp", "lastlog"].contains(source?.format ?? "")
+            add(String(localized: "Журнал"), e.channel, K.channel)
+            add(String(localized: "Программа"), e.provider, K.provider)
+            add(String(localized: "Компьютер"), e.computer, K.computer)
+            if let l = e.level { add(String(localized: "Уровень"), EventText.level(l, keywords: nil), K.level, String(l)) }
+            if binary, source?.format != "lastlog" { add(String(localized: "Тип записи (ut_type)"), String(e.eventId), K.eventId) }
+            add(binary ? String(localized: "Номер записи") : String(localized: "Номер строки"), String(e.recordId))
+            if let p = e.processId { add("PID", String(p)) }
+        } else {
+            add("EventID", String(e.eventId), K.eventId)
+            add(String(localized: "Журнал"), e.channel, K.channel)
+            add(String(localized: "Источник"), e.provider, K.provider)
+            add(String(localized: "Компьютер"), e.computer, K.computer)
+            add(String(localized: "Уровень"), EventText.level(e.level, keywords: e.keywords), K.level, e.level.map(String.init))
+            if let u = e.user { add(String(localized: "Пользователь (SID)"), u, K.user) }
+            add("EventRecordID", String(e.recordId))
+            if let t = e.task { add("Task", String(t), K.task) }
+            if let o = e.opcode { add("Opcode", String(o), K.opcode) }
+            if let k = e.keywords { add("Keywords", "0x" + String(k, radix: 16)) }
+            if let p = e.processId { add("ProcessID / ThreadID", "\(p) / \(e.threadId.map(String.init) ?? "—")") }
+        }
+        if let s = source {
             add(String(localized: "Файл"), s.name, K.source)
             add(String(localized: "Путь"), s.path)
         }

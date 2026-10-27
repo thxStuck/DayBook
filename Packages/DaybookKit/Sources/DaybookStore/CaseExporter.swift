@@ -103,13 +103,7 @@ public struct CaseExporter: Sendable {
     }
 
     static func flagNames(_ f: RecordFlags) -> [String] {
-        let names: [(RecordFlags, String)] = [
-            (.carved, "carved"), (.beyondHeader, "beyondHeader"), (.staleChunk, "stale"), (.afterGap, "afterGap"),
-            (.parseError, "parseError"), (.chunkDataCRC, "crcMismatch"), (.chunkHeaderCRC, "headerCrcMismatch"),
-            (.timeSkew, "timeSkew"), (.foreignTemplate, "foreignTemplate"), (.missingTemplate, "missingTemplate"),
-            (.invalidText, "invalidText"), (.duplicate, "hasCopies"), (.sizeMismatch, "sizeMismatch"),
-        ]
-        return names.filter { f.contains($0.0) }.map(\.1)
+        RecordFlags.names.filter { f.contains($0.0) }.map(\.1)
     }
 
     /// Log values are attacker-controlled: a command line such as `=cmd|' /C calc'!A0` must not

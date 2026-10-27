@@ -29,6 +29,28 @@ public struct RecordFlags: OptionSet, Sendable, Hashable {
     /// Live record found after skipping a corrupted stretch of its chunk (other parsers
     /// stop at the corruption and never show these).
     public static let afterGap = RecordFlags(rawValue: 1 << 12)
+    /// Text logs: the line has no year (classic syslog), it was inferred from the file's dates.
+    public static let yearInferred = RecordFlags(rawValue: 1 << 13)
+    /// Text logs: the line has no time zone; the system's zone from the collection was assumed.
+    public static let zoneAssumed = RecordFlags(rawValue: 1 << 14)
+    /// The record has no time of its own (shell history without timestamps); the source file's
+    /// modification time is used, and records keep their order in the file.
+    public static let timeFromFile = RecordFlags(rawValue: 1 << 15)
+    /// A compressed value could not be unpacked (for example zstd in a systemd journal).
+    public static let notDecompressed = RecordFlags(rawValue: 1 << 16)
+    /// The line matched no known format; it is kept whole in `Message`.
+    public static let unparsed = RecordFlags(rawValue: 1 << 17)
+
+    /// Names used in queries (`flag = …`), exports and the `@Flag` posting lists. The order is
+    /// part of the case format: names are interned in this order.
+    public static let names: [(RecordFlags, String)] = [
+        (.carved, "carved"), (.beyondHeader, "beyondHeader"), (.staleChunk, "stale"), (.afterGap, "afterGap"),
+        (.parseError, "parseError"), (.chunkDataCRC, "crcMismatch"), (.chunkHeaderCRC, "headerCrcMismatch"),
+        (.timeSkew, "timeSkew"), (.foreignTemplate, "foreignTemplate"), (.missingTemplate, "missingTemplate"),
+        (.invalidText, "invalidText"), (.sizeMismatch, "sizeMismatch"), (.duplicate, "hasCopies"),
+        (.yearInferred, "yearInferred"), (.zoneAssumed, "zoneAssumed"), (.timeFromFile, "timeFromFile"),
+        (.notDecompressed, "notDecompressed"), (.unparsed, "unparsed"),
+    ]
 }
 
 public struct EvtxField: Sendable, Equatable {

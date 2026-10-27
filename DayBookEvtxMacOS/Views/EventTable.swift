@@ -104,6 +104,11 @@ final class EventTableCoordinator: NSObject, NSTableViewDataSource, NSTableViewD
 
     // MARK: Columns
 
+    /// Linux lines have a program where Windows events have a provider ("source").
+    private func title(_ spec: ColumnSpec) -> String {
+        model.isLinux && spec.kind == .provider ? String(localized: "Программа") : spec.title
+    }
+
     func syncColumns(_ columns: [ColumnSpec]) {
         guard let table else { return }
         let wanted = Set(columns.map(\.id))
@@ -111,12 +116,12 @@ final class EventTableCoordinator: NSObject, NSTableViewDataSource, NSTableViewD
         for (i, spec) in columns.enumerated() {
             specs[spec.id] = spec
             if let existing = table.tableColumns.first(where: { $0.identifier.rawValue == spec.id }) {
-                existing.title = spec.title
+                existing.title = title(spec)
                 let from = table.column(withIdentifier: existing.identifier)
                 if from != i, i < table.numberOfColumns { table.moveColumn(from, toColumn: i) }
             } else {
                 let col = NSTableColumn(identifier: NSUserInterfaceItemIdentifier(spec.id))
-                col.title = spec.title
+                col.title = title(spec)
                 col.width = spec.width
                 col.minWidth = 40
                 col.resizingMask = .userResizingMask

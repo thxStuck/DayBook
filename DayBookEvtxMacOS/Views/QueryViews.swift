@@ -13,7 +13,8 @@ struct QueryBar: View {
                 Image(systemName: "chevron.right.2")
                     .foregroundStyle(.secondary)
                     .padding(.top, 3)
-                TextField("DQL: EventID = 4624 and LogonType = 3 | group by IpAddress, TargetUserName",
+                TextField(model.isLinux ? "DQL: Action = auth_failure | group by IpAddress, TargetUserName"
+                                        : "DQL: EventID = 4624 and LogonType = 3 | group by IpAddress, TargetUserName",
                           text: $model.queryText, axis: .vertical)
                     .font(.system(size: 13, design: .monospaced))
                     .textFieldStyle(.plain)

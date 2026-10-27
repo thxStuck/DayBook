@@ -23,6 +23,23 @@ public struct SourceInfo: Sendable, Identifiable, Hashable {
     public var badDataCRC: Int?
     public var trailingBytes: Int?
     public var formatVersion: String?
+    // Any format (nil for cases created by older versions): `evtx`, `syslog`, `wtmp`, …
+    public var format: String?
+    /// Log the file belongs to (rotations share it) and the host it was collected from (Linux).
+    public var channel: String?
+    public var host: String?
+    /// Lines or records recognised, and those not imported (empty lines, invalid records).
+    public var parsed: Int?
+    public var skipped: Int?
+    /// Why the file was not (fully) parsed, assumptions made (year, zone), compression.
+    public var note: String?
+
+    public var isEvtx: Bool { format == nil || format == "evtx" }
+}
+
+/// The kind of system a case was built from.
+public enum CasePlatform: String, Sendable {
+    case windows, linux
 }
 
 /// One table row. Field values are dictionary ids resolved through `CaseStore.string(_:)`.
@@ -74,6 +91,8 @@ public struct EventDetail: Sendable {
     public let row: EventRow
     public let fields: [EventField]
     public internal(set) var xml: String?
+    /// The original line or decoded record of non-EVTX sources.
+    public internal(set) var text: String?
     public internal(set) var raw: [UInt8]?
     public let duplicates: [(source: Int, chunk: Int, offset: Int)]
     /// The source file the record is re-read from.
@@ -98,6 +117,8 @@ public final class CaseStore: @unchecked Sendable {
     public let fullTextReady: Bool
     /// Import metadata: options, totals, failed files (key → value).
     public let meta: [String: String]
+    /// `windows` for cases without the key (created before Linux support).
+    public let platform: CasePlatform
     private let tsFile: MappedFile
     let rowsDB: SQLiteDB
     let queryDB: SQLiteDB
@@ -109,8 +130,10 @@ public final class CaseStore: @unchecked Sendable {
     private var keyByName: [String: UInt32] = [:]
     private var keyByExactName: [String: UInt32] = [:]
     private var nameByKey: [UInt32: String] = [:]
-    private let fileLock = NSLock()
+    let fileLock = NSLock()
     private var openFiles: [Int: EvtxFile] = [:]
+    /// Unpacked content of the last text sources read (Linux), keyed by source id.
+    var textFiles: [(id: Int, data: Data)] = []
     /// Stored detection rules, keyed by the run that produced them.
     let detectionCache = DetectionCache()
 
@@ -128,9 +151,11 @@ public final class CaseStore: @unchecked Sendable {
 
         var srcs: [SourceInfo] = []
         let hasStats = (try? rowsDB.scalar("SELECT count(*) FROM pragma_table_info('source') WHERE name = 'empty_chunks'")) == 1
+        let hasFormat = (try? rowsDB.scalar("SELECT count(*) FROM pragma_table_info('source') WHERE name = 'format'")) == 1
         let s = try rowsDB.prepare("""
             SELECT id, path, name, size, sha256, header_chunks, chunks, dirty, records, carved, duplicates, first_ts, last_ts
             \(hasStats ? ", empty_chunks, beyond_new, beyond_stale, bad_header_crc, bad_data_crc, trailing_bytes, version" : "")
+            \(hasFormat ? ", format, channel, host, parsed, skipped, note" : "")
             FROM source ORDER BY id
             """)
         while try s.step() {
@@ -145,7 +170,16 @@ public final class CaseStore: @unchecked Sendable {
                 info.badHeaderCRC = s.optionalInt64(16).map(Int.init)
                 info.badDataCRC = s.optionalInt64(17).map(Int.init)
                 info.trailingBytes = s.optionalInt64(18).map(Int.init)
-                info.formatVersion = s.string(19)
+                info.formatVersion = s.optionalString(19)
+            }
+            if hasFormat {
+                let c: Int32 = hasStats ? 20 : 13
+                info.format = s.optionalString(c)
+                info.channel = s.optionalString(c + 1)
+                info.host = s.optionalString(c + 2)
+                info.parsed = s.optionalInt64(c + 3).map(Int.init)
+                info.skipped = s.optionalInt64(c + 4).map(Int.init)
+                info.note = s.optionalString(c + 5)
             }
             srcs.append(info)
         }
@@ -154,6 +188,7 @@ public final class CaseStore: @unchecked Sendable {
         let ms = try rowsDB.prepare("SELECT key, value FROM meta")
         while try ms.step() { m[ms.string(0)] = ms.string(1) }
         meta = m
+        platform = CasePlatform(rawValue: m["platform"] ?? "") ?? .windows
 
         let k = try rowsDB.prepare("SELECT DISTINCT k FROM post")
         var keyIds: [UInt32] = []
@@ -361,7 +396,7 @@ public final class CaseStore: @unchecked Sendable {
             while try d.step() { dups.append((Int(d.int64(0)), Int(d.int64(1)), Int(d.int64(2)))) }
         }
         let path = row.source >= 0 && row.source < sources.count ? sources[row.source].path : nil
-        return EventDetail(row: row, fields: fields, xml: xml, raw: nil,
+        return EventDetail(row: row, fields: fields, xml: xml, text: nil, raw: nil,
                            duplicates: dups.map { (source: $0.0, chunk: $0.1, offset: $0.2) },
                            sourcePath: path, sourceState: location == nil ? .noLocation : .pending,
                            location: location)
@@ -371,6 +406,7 @@ public final class CaseStore: @unchecked Sendable {
     /// time on a slow or unreachable file: call it off the main thread.
     public func readSourceRecord(_ detail: EventDetail) -> EventDetail {
         guard detail.sourceState == .pending, let location = detail.location else { return detail }
+        if detail.row.source < sources.count, !sources[detail.row.source].isEvtx { return readTextRecord(detail, at: location.offset) }
         var d = detail
         let file: EvtxFile
         do {

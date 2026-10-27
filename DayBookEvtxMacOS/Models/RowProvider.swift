@@ -102,6 +102,7 @@ final class RowProvider {
         guard lo < hi else { return [] }
         let ids = (lo..<hi).compactMap { eventId(at: $0) }
         guard let rows = try? store.rows(ids) else { return [] }
+        let linux = store.platform == .linux
         var need = Set<UInt32>()
         for r in rows { for pair in r.pairs { need.insert(pair.key); need.insert(pair.value) } }
         let needList = Array(need)
@@ -121,7 +122,9 @@ final class RowProvider {
                     summary += (summary.isEmpty ? "" : "  ·  ") + name + ": " + short.replacingOccurrences(of: "\n", with: " ⏎ ")
                 }
             }
-            let description = EventDescriber.describe(provider: r.provider, channel: r.channel, eventId: r.eventId) { byName[$0] }
+            // Linux events carry their text in `Message`: show it as is, the parsed fields follow in the details.
+            let description = linux ? byName["Message"].map { $0.replacingOccurrences(of: "\n", with: " ⏎ ") }
+                : EventDescriber.describe(provider: r.provider, channel: r.channel, eventId: r.eventId) { byName[$0] }
             return DisplayRow(row: r, summary: EventDescriber.param(summary), description: description,
                               actor: Self.actor(byName) ?? r.user, values: values)
         }

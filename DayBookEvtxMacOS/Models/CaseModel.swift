@@ -60,6 +60,10 @@ final class CaseModel {
     let store: CaseStore
     let url: URL
     var title: String { url.deletingPathExtension().lastPathComponent }
+    var isLinux: Bool { store.platform == .linux }
+    /// Sections of the main window. Linux cases have no Windows-only analyses (logon sessions,
+    /// process trees and Sigma rules are built from Windows events).
+    var modes: [MainMode] { isLinux ? [.events, .timeline, .logs, .hosts, .users, .ips] : MainMode.allCases }
 
     // Inputs
     var queryText = ""
@@ -160,8 +164,18 @@ final class CaseModel {
 
     /// Shows one log file in the viewer (newest events first, like Event Viewer).
     func showLog(_ label: String, query: String = "") {
+        if label.hasPrefix(Self.channelPrefix) { showChannel(String(label.dropFirst(Self.channelPrefix.count)), query: query); return }
         viewerLog = label
         scopeFilters = [FieldFilter(key: CaseSchema.SystemKey.source, value: label)]
+        runQuery(text: query)
+    }
+
+    /// `viewerLog` of a whole log (a Linux log with its rotations) rather than one file.
+    static let channelPrefix = "#log:"
+
+    func showChannel(_ channel: String, query: String = "") {
+        viewerLog = Self.channelPrefix + channel
+        scopeFilters = [FieldFilter(key: CaseSchema.SystemKey.channel, value: channel)]
         runQuery(text: query)
     }
 
@@ -202,7 +216,7 @@ final class CaseModel {
         filtered = all
         rows = RowProvider(store: store)
         if viewer {
-            columns = ColumnSpec.viewer
+            columns = store.platform == .linux ? ColumnSpec.linuxViewer : ColumnSpec.viewer
             ascending = false
             result = .empty
             filtered = .empty
@@ -212,6 +226,10 @@ final class CaseModel {
             return
         }
         rows.reset(result: all, ascending: true, ordered: true)
+        if store.platform == .linux {
+            columns = ColumnSpec.linux
+            timelineColumns = ColumnSpec.linuxTimeline
+        }
         loadFacets()
         loadTags()
         loadDetections()
@@ -716,6 +734,12 @@ final class CaseModel {
         newSearch(timeline: false, filters: [FieldFilter(key: CaseSchema.SystemKey.source, value: name)], query: query)
     }
 
+    /// A whole log (all its rotations) as a new search in "Events".
+    func showChannelInEvents(_ channel: String, query: String) {
+        if let owner { owner.showChannelInEvents(channel, query: query); return }
+        newSearch(timeline: false, filters: [FieldFilter(key: CaseSchema.SystemKey.channel, value: channel)], query: query)
+    }
+
     /// DQL time literal in UTC (exact, independent of the display zone).
     static func utcLiteral(_ ft: Int64) -> String { "\"" + FileTime.iso8601(ft) + "\"" }
 
@@ -809,7 +833,13 @@ final class CaseModel {
         let store = self.store
         Task { [weak self] in
             let sections: [FacetSection] = await Task.detached(priority: .utility) {
-                let keys: [(String, String, Int)] = [
+                let keys: [(String, String, Int)] = store.platform == .linux ? [
+                    (CaseSchema.SystemKey.channel, String(localized: "Журналы"), 100),
+                    (CaseSchema.SystemKey.computer, String(localized: "Компьютеры"), 100),
+                    ("Action", String(localized: "Действия"), 60),
+                    (CaseSchema.SystemKey.provider, String(localized: "Программы"), 60),
+                    (CaseSchema.SystemKey.flag, String(localized: "Флаги записей"), 20),
+                ] : [
                     (CaseSchema.SystemKey.channel, String(localized: "Журналы"), 100),
                     (CaseSchema.SystemKey.computer, String(localized: "Компьютеры"), 100),
                     (CaseSchema.SystemKey.eventId, "Event ID", 60),

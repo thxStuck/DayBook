@@ -10,7 +10,7 @@ struct SidebarView: View {
     var body: some View {
         List {
             Section {
-                ForEach(MainMode.allCases) { navRow($0) }
+                ForEach(model.modes) { navRow($0) }
             } header: {
                 Text("Разделы")
             }
@@ -55,7 +55,7 @@ struct SidebarView: View {
     /// Facets of the event views: presets, detections, files, bookmarks, entities, top values.
     @ViewBuilder private var facetSections: some View {
             Section(isExpanded: binding("presets")) {
-                ForEach(Presets.all, id: \.group) { group in
+                ForEach(model.isLinux ? Presets.linux : Presets.all, id: \.group) { group in
                     DisclosureGroup(group.group) {
                         ForEach(group.items) { p in
                             Text(p.title)

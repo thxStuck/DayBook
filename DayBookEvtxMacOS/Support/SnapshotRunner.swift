@@ -44,6 +44,10 @@ enum SnapshotRunner {
                 w.setFrame(NSRect(x: 40, y: 40, width: 1700, height: 1000), display: true)
             }
             await pause(1.5)
+            // `-importLogs … -snapshot …`: the scripted import runs first (the app's own import path).
+            for _ in 0..<2400 where app.importState != nil && app.importState?.error == nil { await pause(0.25) }
+            if let error = app.importState?.error { log("import failed: \(error)") }
+            await pause(1.0)
             guard let model = app.caseModel else {
                 log("no case opened")
                 try? report.write(to: dir.appendingPathComponent("report.txt"), atomically: true, encoding: .utf8)
@@ -127,6 +131,12 @@ enum SnapshotRunner {
                     }
                 }
                 snap(dir, step)
+            }
+            if model.isLinux {
+                await linuxScenario(model, dir: dir, log: log, settle: settle, pause: pause)
+                try? report.write(to: dir.appendingPathComponent("report.txt"), atomically: true, encoding: .utf8)
+                NSApp.terminate(nil)
+                return
             }
             state("1-open")
             log("   histogram bins=\(model.histogram?.bins.count ?? 0) outliers=\(model.histogram?.outliers ?? 0)")
@@ -294,6 +304,78 @@ enum SnapshotRunner {
     }
 
     /// AppKit views (tables, lists, fields) whose frame leaves the window horizontally.
+    /// Linux (UAC) case: sections, every Linux preset, a syslog line and a wtmp record in the
+    /// details, the log viewer, entities and the case information.
+    static func linuxScenario(_ model: CaseModel, dir: URL, log: (String) -> Void, settle: () async -> Void,
+                              pause: (Double) async -> Void) async {
+        func rows(_ m: CaseModel, _ n: Int = 3) {
+            for i in 0..<min(n, m.rows.count) {
+                if let r = m.rows.row(at: i) {
+                    log("   [\(i)] \(m.formatter.string(r.row.ts)) \(r.row.computer) \(r.row.channel) \(r.row.provider) | \(r.text.prefix(120))")
+                }
+            }
+        }
+        func detail(_ m: CaseModel, _ name: String) async {
+            m.select(m.rows.eventId(at: 0))
+            for _ in 0..<40 where m.detail?.row.id != m.selectedId { await pause(0.1) }
+            for _ in 0..<40 where m.detail?.sourceState == .pending { await pause(0.1) }
+            let d = m.detail
+            log("   \(name): fields=\(d?.fields.count ?? -1) source=\(d.map { "\($0.sourceState)" } ?? "-") raw=\(d?.raw?.count ?? 0) text=\(d?.text?.prefix(160).replacingOccurrences(of: "\n", with: " | ") ?? "-")")
+            if let d { snapView(dir, name + "-fields", FieldsContent(model: m, detail: d), size: CGSize(width: 520, height: 900)) }
+        }
+        log("== L1-open: events=\(model.store.eventCount) modes=\(model.modes.map(\.rawValue)) facets=\(model.facets.map { "\($0.id)=\($0.total)" })")
+        rows(model)
+        snap(dir, "L1-open")
+        for preset in Presets.linux.flatMap(\.items) {
+            model.runQuery(text: preset.query)
+            await settle()
+            log("   preset '\(preset.title)': \(model.result.count) events, groups=\(model.groups.count), error=\(model.queryError ?? "-")")
+        }
+        model.runQuery(text: "Action in (auth_failure, invalid_user, user_not_allowed) | group by IpAddress | sort count desc")
+        await settle()
+        log("== L2-ssh-groups: groups=\(model.groups.count) top=\(model.groups.prefix(3).map { "\($0.values.joined(separator: "/")):\($0.count)" })")
+        snap(dir, "L2-ssh-groups")
+        model.runQuery(text: "Action = sudo")
+        await settle()
+        model.showDetails = true
+        await detail(model, "L3-sudo")
+        rows(model)
+        snap(dir, "L3-sudo")
+        model.runQuery(text: "channel = wtmp and Action = login")
+        await settle()
+        await detail(model, "L4-wtmp")
+        snap(dir, "L4-wtmp")
+        model.runQuery(text: "")
+        await settle()
+        model.mode = .logs
+        await pause(2.0)
+        let v = model.logViewer
+        if let id = v.rows.eventId(at: 0) { v.select(id) }
+        await pause(1.0)
+        log("== L5-logs: viewer=\(v.viewerLog ?? "-") rows=\(v.result.count) columns=\(v.columns.map(\.id))")
+        rows(v)
+        snap(dir, "L5-logs")
+        if let src = model.store.sources.first(where: { $0.format == "btmp" }) {
+            v.showLog(src.name)
+            await pause(1.5)
+            log("   file viewer \(src.name): rows=\(v.result.count)")
+            snap(dir, "L5b-logs-file")
+        }
+        for (mode, name) in [(MainMode.users, "L6-users"), (.ips, "L7-ips"), (.hosts, "L8-hosts"), (.timeline, "L9-timeline")] {
+            model.mode = mode
+            await pause(1.5)
+            if let k = mode.kind {
+                let top = model.entities[k]?.sorted { $0.events > $1.events }.prefix(5).map { "\($0.display):\($0.events)" } ?? []
+                log("== \(name): \(model.entities[k]?.count ?? -1) top=\(top)")
+            } else {
+                log("== \(name): result=\(model.result.count)")
+            }
+            snap(dir, name)
+        }
+        snapView(dir, "L10-caseinfo", CaseInfoView(model: model, dismiss: {}), size: CGSize(width: 1700, height: 1000))
+        log("== done")
+    }
+
     static func overflow() -> String {
         guard let window = NSApp.windows.first(where: { $0.isVisible }), let root = window.contentView else { return "no window" }
         let width = root.bounds.width

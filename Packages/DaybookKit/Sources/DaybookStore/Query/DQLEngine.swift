@@ -110,6 +110,8 @@ public final class DQLEngine: @unchecked Sendable {
     ]
 
     private var universe: ResultSet { ResultSet(range: 0..<UInt32(store.eventCount)) }
+    /// Key id of a known field that no event of the case has.
+    static let absentKey = UInt32.max
 
     func resolve(_ field: String) throws -> FieldRef {
         let lower = field.lowercased()
@@ -125,6 +127,10 @@ public final class DQLEngine: @unchecked Sendable {
         if lower == "rulelevel" { return .ruleLevel }
         if let alias = Self.aliases[lower], let k = store.keyId(alias) { return .key(k, alias) }
         if let k = store.keyId(field) { return .key(k, store.keyName(k)) }
+        // Known names without any event in this case match nothing (no posting has this key):
+        // system keys (no flagged record, …) and the fields of the Linux parsers.
+        if let alias = Self.aliases[lower], CaseSchema.SystemKey.all.contains(alias) { return .key(Self.absentKey, alias) }
+        if store.platform == .linux, let name = LinuxVocabulary.field(lower) { return .key(Self.absentKey, name) }
         let suggestions = store.fieldNames.filter { $0.lowercased().contains(lower) }.prefix(5)
         var msg = String(localized: "Неизвестное поле «\(field)»")
         if !suggestions.isEmpty { msg += ". " + String(localized: "Похожие: ") + suggestions.joined(separator: ", ") }

@@ -18,7 +18,7 @@ struct ContentView: View {
         }
         .sheet(item: $app.pendingImport) { p in
             ImportOptionsSheet(pending: p,
-                               start: { app.startImport(sources: p.sources, caseURL: p.caseURL, options: $0) },
+                               start: { app.startImport(sources: p.sources, caseURL: p.caseURL, kind: $0, options: $1) },
                                cancel: { app.pendingImport = nil })
         }
         .alert("Ошибка", isPresented: Binding(get: { app.alert != nil }, set: { if !$0 { app.alert = nil } })) {
@@ -44,7 +44,7 @@ struct WelcomeView: View {
                 .foregroundStyle(.tint)
             VStack(spacing: 6) {
                 Text("DayBookEvtxMacOS").font(.largeTitle.bold())
-                Text("Просмотр и анализ журналов Windows (.evtx) на macOS")
+                Text("Просмотр и анализ журналов Windows (.evtx) и сборов Linux (UAC) на macOS")
                     .foregroundStyle(.secondary)
             }
             HStack(spacing: 12) {
@@ -145,15 +145,19 @@ struct ImportSheet: View {
 }
 
 
-/// Import options, shown before every import so nothing happens implicitly.
+/// Import options, shown before every import so nothing happens implicitly. The kind of system is
+/// chosen here: Windows (EVTX files) or Linux (an extracted UAC collection); it is preselected
+/// from what the chosen folders contain.
 struct ImportOptionsSheet: View {
     let pending: PendingImport
-    let start: (ImportOptions) -> Void
+    let start: (ImportKind, ImportOptions) -> Void
     let cancel: () -> Void
     @AppStorage("import.carveSlack") private var carveSlack = true
     @AppStorage("import.mergeDuplicates") private var mergeDuplicates = true
     @AppStorage("import.hashSources") private var hashSources = true
     @AppStorage("import.runDetections") private var runDetections = true
+    @State private var kind: ImportKind = .windows
+    @State private var found: ImportKind.Found?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
@@ -164,14 +168,33 @@ struct ImportOptionsSheet: View {
                 Text("Кейс: \(pending.caseURL.path)").font(.callout).foregroundStyle(.secondary).padding(.top, 4)
             }
             Divider()
-            option($carveSlack, "Восстанавливать записи из slack-области чанков",
-                   "Остатки старых записей после freeSpaceOffset. Каждая восстановленная запись помечается флагом carved.")
-            option($mergeDuplicates, "Объединять одинаковые записи",
-                   "Одна и та же запись из живого журнала, теневой копии и slack показывается одним событием с флагом «есть копии»; все места нахождения видны в деталях. Если выключить — каждая копия будет отдельной строкой.")
-            option($hashSources, "Считать SHA-256 исходных файлов",
-                   "Для фиксации исходных данных (chain of custody): хеш попадает в сведения о кейсе и в экспорт.")
-            option($runDetections, "Запустить Sigma-детекты после импорта",
-                   "Правила SigmaHQ и Hayabusa из поставки (DRL 1.1) и папка своих правил, если выбрана. Идёт в фоне после открытия кейса; результаты сохраняются в кейсе, их можно перезапустить на экране «Детекты».")
+            HStack(alignment: .firstTextBaseline) {
+                Text("Система:").font(.headline)
+                Picker("", selection: $kind) {
+                    Text("Windows — журналы .evtx").tag(ImportKind.windows)
+                    Text("Linux — сбор UAC").tag(ImportKind.linux)
+                }
+                .pickerStyle(.segmented)
+                .labelsHidden()
+                .frame(maxWidth: 380)
+            }
+            foundSummary
+            if kind == .windows {
+                option($carveSlack, "Восстанавливать записи из slack-области чанков",
+                       "Остатки старых записей после freeSpaceOffset. Каждая восстановленная запись помечается флагом carved.")
+                option($mergeDuplicates, "Объединять одинаковые записи",
+                       "Одна и та же запись из живого журнала, теневой копии и slack показывается одним событием с флагом «есть копии»; все места нахождения видны в деталях. Если выключить — каждая копия будет отдельной строкой.")
+                option($hashSources, "Считать SHA-256 исходных файлов",
+                       "Для фиксации исходных данных (chain of custody): хеш попадает в сведения о кейсе и в экспорт.")
+                option($runDetections, "Запустить Sigma-детекты после импорта",
+                       "Правила SigmaHQ и Hayabusa из поставки (DRL 1.1) и папка своих правил, если выбрана. Идёт в фоне после открытия кейса; результаты сохраняются в кейсе, их можно перезапустить на экране «Детекты».")
+            } else {
+                Text("Папка считается распакованным сбором UAC (Unix-like Artifacts Collector): журналы берутся из [root]/var/log, сведения о системе — из uac.log. Разбираются журналы в формате syslog (auth.log, syslog, kern.log и другие, включая ротации .gz и .xz) и записи входов wtmp, btmp, utmp, lastlog. Остальные файлы /var/log тоже попадают в список источников с причиной, по которой они не разобраны.")
+                    .font(.callout)
+                    .fixedSize(horizontal: false, vertical: true)
+                option($hashSources, "Считать SHA-256 исходных файлов",
+                       "Для фиксации исходных данных (chain of custody): хеш попадает в сведения о кейсе и в экспорт.")
+            }
             Text("Исходные файлы открываются только для чтения и не изменяются.")
                 .font(.footnote).foregroundStyle(.secondary)
             HStack {
@@ -182,13 +205,51 @@ struct ImportOptionsSheet: View {
                     o.carveSlack = carveSlack
                     o.mergeDuplicates = mergeDuplicates
                     o.hashSources = hashSources
-                    start(o)
+                    start(kind, o)
                 }
                 .keyboardShortcut(.defaultAction)
+                .disabled(found == nil)
             }
         }
         .padding(24)
-        .frame(width: 600)
+        .frame(width: 640)
+        .task {
+            let sources = pending.sources
+            let f = await Task.detached(priority: .userInitiated) { ImportKind.detect(sources) }.value
+            found = f
+            kind = f.suggested
+        }
+    }
+
+    /// What the chosen folders contain, so the choice of system is an informed one.
+    @ViewBuilder private var foundSummary: some View {
+        if let f = found {
+            VStack(alignment: .leading, spacing: 3) {
+                if f.collections.isEmpty {
+                    Text("Сбор UAC не найден (нужна папка [root] и рядом uac.log, live_response или bodyfile).")
+                } else {
+                    ForEach(f.collections, id: \.path) { c in
+                        Text("Сбор UAC: \(c.hostname ?? "?") · UAC \(c.version ?? "?") · \(c.os ?? "?") · пояс \(c.timeZone ?? "не указан") · \(c.started ?? "")")
+                    }
+                }
+                Text("Файлов .evtx: \(f.evtxFiles.formatted())")
+                if kind == .linux, f.collections.isEmpty {
+                    Label("Для Linux выберите распакованный сбор UAC (архив .tar.gz сначала распакуйте).", systemImage: "exclamationmark.triangle")
+                        .foregroundStyle(.orange)
+                }
+                if kind == .windows, f.evtxFiles == 0 {
+                    Label("В выбранных источниках нет файлов .evtx.", systemImage: "exclamationmark.triangle")
+                        .foregroundStyle(.orange)
+                }
+            }
+            .font(.callout)
+            .foregroundStyle(.secondary)
+        } else {
+            HStack(spacing: 6) {
+                ProgressView().controlSize(.small)
+                Text("Определяю содержимое папок…").font(.callout).foregroundStyle(.secondary)
+            }
+        }
     }
 
     private func option(_ value: Binding<Bool>, _ title: LocalizedStringKey, _ note: LocalizedStringKey) -> some View {

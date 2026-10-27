@@ -1,5 +1,6 @@
 import AppKit
 import DaybookStore
+import EvtxCore
 import Foundation
 import Observation
 
@@ -77,6 +78,22 @@ final class ImportState {
     }
 }
 
+/// What a new case is built from.
+enum ImportKind: String, Hashable {
+    case windows, linux
+
+    struct Found: Sendable {
+        var evtxFiles: Int
+        var collections: [UacInfo]
+        /// Linux when there are UAC collections and no EVTX files, else Windows.
+        var suggested: ImportKind { !collections.isEmpty && evtxFiles == 0 ? .linux : .windows }
+    }
+
+    nonisolated static func detect(_ sources: [URL]) -> Found {
+        Found(evtxFiles: findEvtxFiles(sources).count, collections: UacCollection.find(in: sources).map(\.info))
+    }
+}
+
 struct PendingImport: Identifiable {
     let id = UUID()
     let sources: [URL]
@@ -111,7 +128,9 @@ final class AppModel {
             o.carveSlack = AppDefaults.store.object(forKey: "import.carveSlack") as? Bool ?? true
             o.mergeDuplicates = AppDefaults.store.object(forKey: "import.mergeDuplicates") as? Bool ?? true
             o.hashSources = AppDefaults.store.object(forKey: "import.hashSources") as? Bool ?? true
-            startImport(sources: [URL(fileURLWithPath: args[i + 1])], caseURL: caseURL, options: o)
+            // `-importKind linux` imports the folder as a UAC collection.
+            let kind = args.firstIndex(of: "-importKind").flatMap { $0 + 1 < args.count ? ImportKind(rawValue: args[$0 + 1]) : nil }
+            startImport(sources: [URL(fileURLWithPath: args[i + 1])], caseURL: caseURL, kind: kind ?? .windows, options: o)
         }
     }
 
@@ -119,7 +138,7 @@ final class AppModel {
 
     func newCaseFromLogs() {
         let open = NSOpenPanel()
-        open.title = String(localized: "Выберите папку с журналами или файлы .evtx")
+        open.title = String(localized: "Выберите папку с журналами (.evtx) или распакованный сбор UAC")
         open.prompt = String(localized: "Выбрать")
         open.canChooseDirectories = true
         open.canChooseFiles = true
@@ -147,11 +166,21 @@ final class AppModel {
         pendingImport = PendingImport(sources: sources, caseURL: caseURL)
     }
 
-    func startImport(sources: [URL], caseURL: URL, options: ImportOptions = ImportOptions()) {
+    func startImport(sources: [URL], caseURL: URL, kind: ImportKind = .windows, options: ImportOptions = ImportOptions()) {
         pendingImport = nil
         let state = ImportState(sources: sources, caseURL: caseURL)
         importState = state
-        let importer = CaseImporter(sources: sources, caseURL: caseURL, options: options)
+        let run: @Sendable (@escaping @Sendable (ImportProgress) -> Void, @escaping @Sendable () -> Bool) throws -> ImportSummary
+        switch kind {
+        case .windows:
+            let importer = CaseImporter(sources: sources, caseURL: caseURL, options: options)
+            run = { try importer.run(progress: $0, cancelled: $1) }
+        case .linux:
+            var o = LinuxImportOptions()
+            o.hashSources = options.hashSources
+            let importer = UacImporter(sources: sources, caseURL: caseURL, options: o)
+            run = { try importer.run(progress: $0, cancelled: $1) }
+        }
         let cancel = state.cancel
         let activity = ActivityToken("Импорт журналов")
         Task.detached(priority: .userInitiated) { [weak self] in
@@ -159,14 +188,14 @@ final class AppModel {
             do {
                 let t0 = Date()
                 let phases = PhaseLog()
-                let summary = try importer.run(progress: { p in
+                let summary = try run({ p in
                     phases.note(p.phase, Date().timeIntervalSince(t0))
                     Task { @MainActor in
                         state.phase = p.phase
                         state.fraction = p.fraction
                         state.events = p.events
                     }
-                }, cancelled: { cancel.isSet })
+                }, { cancel.isSet })
                 if ProcessInfo.processInfo.arguments.contains("-importTo") {
                     let report = String(format: "app import: %.2fs, events=%d\n", Date().timeIntervalSince(t0), summary.events) + phases.text
                     try? report.write(to: caseURL.appendingPathExtension("import-report.txt"), atomically: true, encoding: .utf8)
@@ -174,7 +203,8 @@ final class AppModel {
                 await MainActor.run {
                     self?.importState = nil
                     self?.open(caseURL)
-                    if AppDefaults.store.object(forKey: "import.runDetections") as? Bool ?? true {
+                    // Sigma rules of the bundled packs are Windows rules: Linux cases skip them.
+                    if kind == .windows, AppDefaults.store.object(forKey: "import.runDetections") as? Bool ?? true {
                         self?.caseModel?.runDetections()
                     }
                 }

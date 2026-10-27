@@ -209,21 +209,33 @@ args.removeAll { $0 == "--jsonl" }
 
 func ingest(_ args: [String]) {
     let paths = args.filter { !$0.hasPrefix("--") }
-    guard paths.count >= 2 else { fail("usage: evtxdump ingest <case.daybook> <file|dir>... [--no-merge] [--no-carve] [--no-hash]") }
-    var options = ImportOptions()
-    options.mergeDuplicates = !args.contains("--no-merge")
-    options.carveSlack = !args.contains("--no-carve")
-    options.hashSources = !args.contains("--no-hash")
-    let importer = CaseImporter(sources: paths.dropFirst().map { URL(fileURLWithPath: $0) },
-                                caseURL: URL(fileURLWithPath: paths[0]), options: options)
+    guard paths.count >= 2 else { fail("usage: evtxdump ingest <case.daybook> <file|dir>... [--windows|--linux] [--no-merge] [--no-carve] [--no-hash]") }
+    let inputs = paths.dropFirst().map { URL(fileURLWithPath: $0) }
+    let caseURL = URL(fileURLWithPath: paths[0])
+    // Without a flag: Linux when the folders hold an extracted UAC collection and no EVTX files.
+    let linux = args.contains("--linux") || (!args.contains("--windows") && findEvtxFiles(inputs).isEmpty
+                                             && !UacCollection.find(in: inputs).isEmpty)
     let t0 = Date()
     let lastPhase = Locked<String>("")
+    let report: @Sendable (ImportProgress) -> Void = { p in
+        if lastPhase.swap(p.phase.rawValue) != p.phase.rawValue {
+            print(String(format: "%7.3fs  %@  (events %d)", Date().timeIntervalSince(t0), p.phase.rawValue, p.events))
+        }
+    }
     do {
-        let s = try importer.run(progress: { p in
-            if lastPhase.swap(p.phase.rawValue) != p.phase.rawValue {
-                print(String(format: "%7.3fs  %@  (events %d)", Date().timeIntervalSince(t0), p.phase.rawValue, p.events))
-            }
-        })
+        let s: ImportSummary
+        if linux {
+            var options = LinuxImportOptions()
+            options.hashSources = !args.contains("--no-hash")
+            print("linux (UAC)")
+            s = try UacImporter(sources: inputs, caseURL: caseURL, options: options).run(progress: report)
+        } else {
+            var options = ImportOptions()
+            options.mergeDuplicates = !args.contains("--no-merge")
+            options.carveSlack = !args.contains("--no-carve")
+            options.hashSources = !args.contains("--no-hash")
+            s = try CaseImporter(sources: inputs, caseURL: caseURL, options: options).run(progress: report)
+        }
         print("files=\(s.files) events=\(s.events) duplicates=\(s.duplicates) carved=\(s.carved) parseErrors=\(s.parseErrors) failed=\(s.failedFiles.count) elapsed=\(String(format: "%.2f", s.elapsed))s")
         for f in s.failedFiles { print("  failed: \(f)") }
     } catch {
