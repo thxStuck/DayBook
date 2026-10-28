@@ -3,6 +3,7 @@ import Foundation
 public enum ProcessSource: String, Sendable, CaseIterable {
     case sysmon      // Sysmon 1 / 5, linked by ProcessGuid (exact)
     case security    // Security 4688 / 4689, linked by PID (heuristic)
+    case audit       // Linux auditd execve, linked by PPID (heuristic)
 }
 
 public final class ProcessNode: Identifiable, @unchecked Sendable {
@@ -66,7 +67,55 @@ public enum ProcessTreeBuilder {
         switch source {
         case .sysmon: try sysmon(store)
         case .security: try security(store)
+        case .audit: try audit(store)
         }
+    }
+
+    /// Linux: every execve auditd logged. exec keeps the PID, so a process that runs several
+    /// programs appears once per program; a child hangs under the latest earlier exec of its PPID
+    /// on the same host and boot (heuristic, flagged as linked by PID).
+    private static func audit(_ store: CaseStore) throws -> ProcessForest {
+        let created = try store.matching(key: "Action", value: "process_exec")
+        let boots = try store.linuxBootTimes()
+        let names: Set<String> = ["pid", "ppid", "exe", "comm", "CommandLine", "SubjectUserName", "SubjectDomainName", "cwd",
+                                  "key", "success", "UidName", "EuidName", "tty", "ses"]
+        func key(_ host: String, _ ts: Int64, _ pid: String) -> String {
+            let h = EntityNames.hostKey(host) ?? host
+            return "\(h)|\(bootSegment(boots[h], ts))|\(pid)"
+        }
+        var byPid: [String: [ProcessNode]] = [:]
+        var roots: [ProcessNode] = []
+        var nextId = 0, synthetic = 0, linked = 0, count = 0
+        for e in try store.fieldEvents(created, names: names).sorted(by: { ($0.ts, $0.id) < ($1.ts, $1.id) }) {
+            let user = [e.f("SubjectDomainName"), e.f("SubjectUserName")].compactMap { $0 }.joined(separator: "\\")
+            var extra: [String: String] = [:]
+            for k in ["cwd", "key", "success", "UidName", "EuidName", "tty", "ses"] { if let v = e.f(k) { extra[k] = v } }
+            let n = ProcessNode(id: nextId, host: e.computer, image: e.f("exe") ?? e.f("comm") ?? "?", commandLine: e.f("CommandLine"),
+                                pid: e.f("pid"), user: user.isEmpty ? nil : user, start: e.ts, event: e.id, guid: nil,
+                                synthetic: false, extra: extra)
+            nextId += 1
+            count += 1
+            if let ppid = e.f("ppid") {
+                let k = key(e.computer, e.ts, ppid)
+                if let parent = byPid[k]?.last(where: { ($0.start ?? .min) <= e.ts }) {
+                    parent.add(n)
+                    n.linkedByPID = true
+                    linked += 1
+                } else {
+                    let p = ProcessNode(id: nextId, host: e.computer, image: "?", commandLine: nil, pid: ppid, user: nil,
+                                        start: nil, event: nil, guid: nil, synthetic: true)
+                    nextId += 1
+                    synthetic += 1
+                    p.add(n)
+                    roots.append(p)
+                    byPid[k, default: []].append(p)
+                }
+            } else {
+                roots.append(n)
+            }
+            if let pid = e.f("pid") { byPid[key(e.computer, e.ts, pid), default: []].append(n) }
+        }
+        return ProcessForest(roots: sortTree(mergeSynthetic(roots)), processCount: count, syntheticCount: synthetic, pidLinkedCount: linked)
     }
 
     private static func sysmon(_ store: CaseStore) throws -> ProcessForest {

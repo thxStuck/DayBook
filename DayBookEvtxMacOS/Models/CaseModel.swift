@@ -65,7 +65,9 @@ final class CaseModel {
     var isLinux: Bool { store.platform == .linux }
     /// Sections of the main window. Linux cases have no Windows-only analyses (logon sessions,
     /// process trees and Sigma rules are built from Windows events).
-    var modes: [MainMode] { isLinux ? [.events, .timeline, .logs, .system, .hosts, .users, .ips] : MainMode.allCases.filter { $0 != .system } }
+    var modes: [MainMode] {
+        isLinux ? [.events, .timeline, .logs, .system, .hosts, .users, .ips, .sessions, .processes] : MainMode.allCases.filter { $0 != .system }
+    }
 
     // Inputs
     var queryText = ""
@@ -231,6 +233,7 @@ final class CaseModel {
         if store.platform == .linux {
             columns = ColumnSpec.linux
             timelineColumns = ColumnSpec.linuxTimeline
+            processSource = .audit
         }
         loadFacets()
         loadTags()
@@ -614,7 +617,10 @@ final class CaseModel {
         let store = self.store
         Task { [weak self] in
             let r: Result<(SessionAnalysis, [RDPSession]), Error> = await Task.detached(priority: .userInitiated) {
-                Result { (try SessionBuilder.build(store), try RDPSessionBuilder.build(store)) }
+                Result {
+                    store.platform == .linux ? (try LinuxSessionBuilder.build(store), [])
+                                             : (try SessionBuilder.build(store), try RDPSessionBuilder.build(store))
+                }
             }.value
             switch r {
             case let .success((a, rdp)): self?.sessions = a; self?.rdpSessions = rdp
@@ -748,6 +754,15 @@ final class CaseModel {
     /// Events of one logon session: same host, the logon id in any logon-id field, inside
     /// the session's time span. Only fields present in the case are used.
     func sessionQuery(_ s: LogonSession) -> String {
+        if isLinux {
+            // Linux: what the user and the terminal did while the session lasted.
+            let user = s.user.split(separator: "\\").last.map(String.init) ?? s.user
+            let tty = s.logonId.components(separatedBy: " · ").first ?? s.logonId
+            var q = "host = \"\(s.host)\" and (TargetUserName = \"\(user)\" or SubjectUserName = \"\(user)\" or Terminal = \"\(tty)\")"
+            q += " and time >= \(Self.utcLiteral(s.start))"
+            if let end = s.end { q += " and time <= \(Self.utcLiteral(end))" }
+            return q
+        }
         let fields = ["TargetLogonId", "SubjectLogonId", "LogonId"].filter { store.keyId($0) != nil }
         let idPart = fields.map { "\($0) = \(s.logonId)" }.joined(separator: " or ")
         var q = "host = \"\(s.host)\" and (\(idPart)) and time >= \(Self.utcLiteral(s.start))"
@@ -762,7 +777,8 @@ final class CaseModel {
             return fields.map { "\($0) = \"\(guid)\"" }.joined(separator: " or ")
         }
         guard let pid = n.pid, let start = n.start else { return nil }
-        let fields = ["NewProcessId", "ProcessId"].filter { store.keyId($0) != nil }
+        // Linux audit: the process's own records (pid) and those of its children (ppid).
+        let fields = (isLinux ? ["pid", "ppid"] : ["NewProcessId", "ProcessId"]).filter { store.keyId($0) != nil }
         var q = "host = \"\(n.host)\" and (\(fields.map { "\($0) = \(pid)" }.joined(separator: " or "))) and time >= \(Self.utcLiteral(start))"
         if let end = n.end { q += " and time <= \(Self.utcLiteral(end))" }
         return q

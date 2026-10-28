@@ -361,10 +361,26 @@ enum SnapshotRunner {
             log("   file viewer \(src.name): rows=\(v.result.count)")
             snap(dir, "L5b-logs-file")
         }
-        for (mode, name) in [(MainMode.users, "L6-users"), (.ips, "L7-ips"), (.hosts, "L8-hosts"), (.system, "L8b-system"), (.timeline, "L9-timeline")] {
+        for (mode, name) in [(MainMode.users, "L6-users"), (.ips, "L7-ips"), (.hosts, "L8-hosts"), (.system, "L8b-system"),
+                             (.sessions, "L8c-sessions"), (.processes, "L8d-processes"), (.timeline, "L9-timeline")] {
             model.mode = mode
             await pause(1.5)
-            if let k = mode.kind {
+            if mode == .sessions {
+                for _ in 0..<40 where model.sessions == nil { await pause(0.25) }
+                log("== \(name): sessions=\(model.sessions?.sessions.count ?? -1) unmatchedEnds=\(model.sessions?.unmatchedEnds ?? -1)")
+                if let s = model.sessions?.sessions.first(where: { $0.end != nil }) {
+                    let q = model.sessionQuery(s)
+                    model.showQuery(q)
+                    await settle()
+                    log("   session query: \(q.prefix(200)) -> \(model.result.count) events, error=\(model.queryError ?? "-")")
+                    model.mode = .sessions
+                    await pause(1.0)
+                }
+            } else if mode == .processes {
+                for _ in 0..<80 where model.forests[.audit] == nil { await pause(0.25) }
+                let f = model.forests[.audit]
+                log("== \(name): processes=\(f?.processCount ?? -1) roots=\(f?.roots.count ?? -1) linked=\(f?.pidLinkedCount ?? -1)")
+            } else if let k = mode.kind {
                 let top = model.entities[k]?.sorted { $0.events > $1.events }.prefix(5).map { "\($0.display):\($0.events)" } ?? []
                 log("== \(name): \(model.entities[k]?.count ?? -1) top=\(top)")
             } else {

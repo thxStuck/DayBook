@@ -361,7 +361,7 @@ func analysis(_ cmd: String, _ args: [String]) {
         let store = try CaseStore(url: URL(fileURLWithPath: path))
         let t0 = Date()
         if cmd == "sessions" {
-            let a = try SessionBuilder.build(store)
+            let a = store.platform == .linux ? try LinuxSessionBuilder.build(store) : try SessionBuilder.build(store)
             let closed = a.sessions.filter { $0.end != nil }.count
             print(String(format: "%.0f ms: sessions=%d closed=%d open=%d privileged=%d unmatchedEnds=%d hostsWithoutBoot=%@",
                          Date().timeIntervalSince(t0) * 1000, a.sessions.count, closed, a.sessions.count - closed,
@@ -373,7 +373,7 @@ func analysis(_ cmd: String, _ args: [String]) {
             print("  RDP (LSM) chains: \(rdp.count)")
             for r in rdp.prefix(5) { print("    \(r.host) #\(r.sessionId) \(r.user) \(r.address): \(r.steps)") }
         } else {
-            for source in ProcessSource.allCases {
+            for source in store.platform == .linux ? [.audit] : ProcessSource.allCases.filter({ $0 != .audit }) {
                 let f = try ProcessTreeBuilder.build(store, source: source)
                 print(String(format: "%@: %.0f ms processes=%d roots=%d synthetic=%d linkedByPID=%d", source.rawValue,
                              Date().timeIntervalSince(t0) * 1000, f.processCount, f.roots.count, f.syntheticCount, f.pidLinkedCount))

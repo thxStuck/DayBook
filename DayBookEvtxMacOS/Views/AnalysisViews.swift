@@ -29,13 +29,17 @@ struct SessionsView: View {
     var body: some View {
         VStack(spacing: 0) {
             HStack(spacing: 10) {
-                Picker("", selection: $tab) {
-                    Text("Входы 4624").tag(0).help("Вход 4624 → выход 4634/4647")
-                    Text("RDP").tag(1).help("Цепочки TerminalServices-LocalSessionManager")
+                if model.isLinux {
+                    Text("Входы wtmp: вход → выход на том же терминале или перезагрузка").font(.callout).foregroundStyle(.secondary)
+                } else {
+                    Picker("", selection: $tab) {
+                        Text("Входы 4624").tag(0).help("Вход 4624 → выход 4634/4647")
+                        Text("RDP").tag(1).help("Цепочки TerminalServices-LocalSessionManager")
+                    }
+                    .pickerStyle(.segmented)
+                    .fixedSize()
                 }
-                .pickerStyle(.segmented)
-                .fixedSize()
-                if tab == 0 {
+                if tab == 0, !model.isLinux {
                     Picker("Тип", selection: $type) {
                         Text("Все типы").tag(-2)
                         ForEach([0, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13], id: \.self) { t in
@@ -175,12 +179,16 @@ struct ProcessTreeView: View {
         let forest = model.forests[model.processSource]
         VStack(spacing: 0) {
             HStack(spacing: 10) {
-                Picker("", selection: Binding(get: { model.processSource }, set: { model.processSource = $0 })) {
-                    Text("Sysmon 1/5").tag(ProcessSource.sysmon).help("Sysmon 1/5 — связь по ProcessGuid")
-                    Text("Security 4688").tag(ProcessSource.security).help("Security 4688/4689 — связь по PID")
+                if model.isLinux {
+                    Text("Запуски программ из auditd (execve)").font(.callout).foregroundStyle(.secondary)
+                } else {
+                    Picker("", selection: Binding(get: { model.processSource }, set: { model.processSource = $0 })) {
+                        Text("Sysmon 1/5").tag(ProcessSource.sysmon).help("Sysmon 1/5 — связь по ProcessGuid")
+                        Text("Security 4688").tag(ProcessSource.security).help("Security 4688/4689 — связь по PID")
+                    }
+                    .pickerStyle(.segmented)
+                    .fixedSize()
                 }
-                .pickerStyle(.segmented)
-                .fixedSize()
                 TextField("Поиск по образу или командной строке", text: $search)
                     .textFieldStyle(.roundedBorder)
                     .frame(minWidth: 120, maxWidth: 340)
@@ -297,10 +305,12 @@ struct ProcessTreeView: View {
         HStack {
             Text(model.processSource == .sysmon
                  ? String(localized: "Связь родитель → потомок записана Sysmon (ParentProcessGuid) — точная.")
+                 : model.processSource == .audit
+                 ? String(localized: "auditd пишет PPID; exec не меняет PID, поэтому процесс, запускавший несколько программ, виден несколько раз. Связь восстановлена эвристически (значок 🔗), «образ неизвестен» — родитель, чей запуск не попал в журнал.")
                  : String(localized: "В 4688 записан только PID родителя: связь восстановлена эвристически (значок 🔗). PID переиспользуются, проверяйте по времени."))
             Spacer()
             Text(String(localized: "Процессов \(f.processCount.formatted()) · без события создания \(f.syntheticCount.formatted())")
-                 + (model.processSource == .security ? String(localized: " · связано по PID \(f.pidLinkedCount.formatted())") : "")
+                 + (model.processSource != .sysmon ? String(localized: " · связано по PID \(f.pidLinkedCount.formatted())") : "")
                  + (f.repeatedGuidEvents > 0 ? String(localized: " · повторных GUID \(f.repeatedGuidEvents)") : ""))
         }
         .font(.caption)

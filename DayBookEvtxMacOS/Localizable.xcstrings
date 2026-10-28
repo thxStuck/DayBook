@@ -1115,6 +1115,16 @@
         }
       }
     },
+    "auditd пишет PPID; exec не меняет PID, поэтому процесс, запускавший несколько программ, виден несколько раз. Связь восстановлена эвристически (значок 🔗), «образ неизвестен» — родитель, чей запуск не попал в журнал.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "auditd writes the PPID; exec keeps the PID, so a process that ran several programs appears several times. The links are reconstructed heuristically (🔗); \"image unknown\" is a parent whose launch is not in the log."
+          }
+        }
+      }
+    },
     "base64 от значения с маской не поддерживается": {
       "localizations": {
         "en": {
@@ -1919,6 +1929,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Logons 4624"
+          }
+        }
+      }
+    },
+    "Входы wtmp: вход → выход на том же терминале или перезагрузка": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "wtmp logins: login → logout on the same terminal, or a reboot"
           }
         }
       }
@@ -2759,6 +2779,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Program launches (auditd)"
+          }
+        }
+      }
+    },
+    "Запуски программ из auditd (execve)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Program launches from auditd (execve)"
           }
         }
       }
