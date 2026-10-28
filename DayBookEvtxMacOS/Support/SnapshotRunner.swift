@@ -65,7 +65,8 @@ enum SnapshotRunner {
                 await settle()
                 if let id = model.rows.eventId(at: 0) { model.select(id) }
                 await pause(0.5)
-                let order: [MainMode] = [.events, .users, .timeline, .hosts, .sessions, .detections, .processes, .logs, .ips, .events]
+                let preferred: [MainMode] = [.events, .users, .timeline, .hosts, .sessions, .detections, .processes, .logs, .system, .ips, .events]
+                let order = preferred.filter(model.modes.contains)
                 for round in 0..<rounds {
                     for (i, mode) in order.enumerated() {
                         model.mode = mode
