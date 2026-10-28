@@ -16,6 +16,20 @@ if ! xcodebuild -project DayBookEvtxMacOS.xcodeproj -scheme DayBookEvtxMacOS -co
 fi
 rm -rf build/DayBookEvtxMacOS.app
 ditto build/DerivedData.noindex/Build/Products/Release/DayBookEvtxMacOS.app build/DayBookEvtxMacOS.app
+
+# The linker's debug map lists every object file with its absolute path on this machine (user
+# name, folders). The distributed binary must not carry it: strip it (the symbols stay in the
+# dSYM next to the build products), sign again (ad hoc, hardened runtime, no debugger entitlement)
+# and refuse the build if any path of this machine is still inside.
+bin=build/DayBookEvtxMacOS.app/Contents/MacOS/DayBookEvtxMacOS
+strip -S -x "$bin"
+codesign --force --sign - --options runtime build/DayBookEvtxMacOS.app
+for leak in "$PWD" "$HOME" "/Users/$USER" "-Users-$USER" "$USER"; do
+    if /usr/bin/grep -a -q -F -- "$leak" "$bin"; then
+        echo "The app binary still contains \"$leak\" (a path or name of this machine) — not usable for a release"
+        exit 1
+    fi
+done
 echo "App: $PWD/build/DayBookEvtxMacOS.app"
 
 (cd Packages/DaybookKit && swift build -c release > ../../build/swiftbuild.log 2>&1) || {
