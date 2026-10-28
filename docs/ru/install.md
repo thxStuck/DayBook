@@ -20,7 +20,7 @@ nav_order: 2
 
 ## Установка готовой сборки
 
-1. Откройте [последний релиз](https://github.com/thxStuck/DayBookEvtxMacOS/releases/latest) и скачайте
+1. Откройте [последний релиз](https://github.com/thxStuck/DayBook/releases/latest) и скачайте
    архив `DayBookEvtxMacOS-<версия>-arm64.zip`.
 2. Распакуйте архив и перенесите `DayBookEvtxMacOS.app` в «Программы».
 3. Если хотите проверить архив, сравните его SHA-256 со значением в описании релиза:
@@ -92,8 +92,8 @@ defaults delete app.daybook.evtx AppleLanguages
 ## Сборка из исходников
 
 ```bash
-git clone https://github.com/thxStuck/DayBookEvtxMacOS.git
-cd DayBookEvtxMacOS
+git clone https://github.com/thxStuck/DayBook.git
+cd DayBook
 scripts/build.sh
 open build/DayBookEvtxMacOS.app
 ```

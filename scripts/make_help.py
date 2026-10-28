@@ -26,7 +26,7 @@ BOOK_ID = "app.daybook.evtx.help"
 TITLES = {"ru": "Справка DayBookEvtxMacOS", "en": "DayBookEvtxMacOS Help"}
 CONTENTS = {"ru": "Содержание", "en": "Contents"}
 ONLINE = {"ru": "Документация на сайте", "en": "Documentation online"}
-SITE = "https://thxstuck.github.io/DayBookEvtxMacOS/"
+SITE = "https://thxstuck.github.io/DayBook/"
 CALLOUT_TITLES = {"note": "Note", "warning": "Warning", "note-ru": "Примечание", "warning-ru": "Важно"}
 
 

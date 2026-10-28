@@ -44,7 +44,7 @@ Source logs are only ever read, never modified.
 
 ## Quick start
 
-1. Download the app from [Releases](https://github.com/thxStuck/DayBookEvtxMacOS/releases/latest)
+1. Download the app from [Releases](https://github.com/thxStuck/DayBook/releases/latest)
    and allow it to open on first launch — see [Installation](install.html).
 2. File → New Case from Logs… (⌘N), choose the logs folder and where to save the case.
 3. Keep the default import options and click Start Import.

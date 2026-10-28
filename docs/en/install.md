@@ -20,7 +20,7 @@ nav_order: 2
 
 ## Installing a release
 
-1. Open the [latest release](https://github.com/thxStuck/DayBookEvtxMacOS/releases/latest) and
+1. Open the [latest release](https://github.com/thxStuck/DayBook/releases/latest) and
    download `DayBookEvtxMacOS-<version>-arm64.zip`.
 2. Unzip it and move `DayBookEvtxMacOS.app` to Applications.
 3. To verify the download, compare its SHA-256 with the value in the release notes:
@@ -88,8 +88,8 @@ defaults delete app.daybook.evtx AppleLanguages
 ## Building from source
 
 ```bash
-git clone https://github.com/thxStuck/DayBookEvtxMacOS.git
-cd DayBookEvtxMacOS
+git clone https://github.com/thxStuck/DayBook.git
+cd DayBook
 scripts/build.sh
 open build/DayBookEvtxMacOS.app
 ```

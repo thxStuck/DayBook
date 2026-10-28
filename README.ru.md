@@ -4,8 +4,8 @@
 
 # DayBookEvtxMacOS
 
-[English](README.md) · **Русский** · [Документация](https://thxstuck.github.io/DayBookEvtxMacOS/ru/) ·
-[Скачать](https://github.com/thxStuck/DayBookEvtxMacOS/releases/latest)
+[English](README.md) · **Русский** · [Документация](https://thxstuck.github.io/DayBook/ru/) ·
+[Скачать](https://github.com/thxStuck/DayBook/releases/latest)
 
 Нативное приложение для macOS для просмотра и анализа журналов Windows (`.evtx`) в стиле SIEM:
 выбираете папку с журналами (например, `C/Windows/System32/winevt/logs` из триажа) — все файлы
@@ -45,7 +45,7 @@
 
 ## Скачать
 
-Готовая сборка для Apple Silicon — в [Releases](https://github.com/thxStuck/DayBookEvtxMacOS/releases/latest).
+Готовая сборка для Apple Silicon — в [Releases](https://github.com/thxStuck/DayBook/releases/latest).
 Распакуйте архив и перенесите `DayBookEvtxMacOS.app` в «Программы».
 
 Приложение подписано локально (ad-hoc) и не нотаризовано Apple — для этого нужен платный
@@ -74,7 +74,7 @@ open build/DayBookEvtxMacOS.app
 ## Документация
 
 Полная документация на русском и английском — на сайте
-[thxstuck.github.io/DayBookEvtxMacOS](https://thxstuck.github.io/DayBookEvtxMacOS/ru/): импорт и кейсы,
+[thxstuck.github.io/DayBook](https://thxstuck.github.io/DayBook/ru/): импорт и кейсы,
 работа с событиями, полный справочник языка запросов DQL, сущности, сеансы и процессы, Sigma-детекты,
 экспорт, устройство приложения, частые вопросы. Исходники страниц — в папке [`docs/`](docs/).
 

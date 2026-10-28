@@ -1,7 +1,7 @@
 title: DayBookEvtxMacOS
-description: Native macOS viewer and analyzer for Windows EVTX logs · Нативное приложение для macOS для анализа журналов Windows
+description: Native macOS app for Windows event logs (EVTX) and Linux collections (UAC) · Нативное приложение для macOS для анализа журналов Windows и сборов Linux
 url: https://thxstuck.github.io
-baseurl: /DayBookEvtxMacOS
+baseurl: /DayBook
 lang: ru
 
 remote_theme: just-the-docs/just-the-docs@v0.10.0
@@ -20,8 +20,8 @@ back_to_top: true
 back_to_top_text: "↑"
 
 aux_links:
-  "GitHub": https://github.com/thxStuck/DayBookEvtxMacOS
-  "Download · Скачать": https://github.com/thxStuck/DayBookEvtxMacOS/releases/latest
+  "GitHub": https://github.com/thxStuck/DayBook
+  "Download · Скачать": https://github.com/thxStuck/DayBook/releases/latest
 aux_links_new_tab: true
 
 callouts:
@@ -40,4 +40,4 @@ callouts:
 
 footer_content: >-
   © 2026 thxStuck. All rights reserved · Sigma rules: Detection Rule License 1.1 ·
-  <a href="https://github.com/thxStuck/DayBookEvtxMacOS/issues">Issues</a>
+  <a href="https://github.com/thxStuck/DayBook/issues">Issues</a>

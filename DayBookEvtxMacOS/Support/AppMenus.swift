@@ -3,11 +3,11 @@ import SwiftUI
 
 /// Project addresses; the documentation opens in the interface language.
 enum AppLinks {
-    static let repo = URL(string: "https://github.com/thxStuck/DayBookEvtxMacOS")!
-    static let newIssue = URL(string: "https://github.com/thxStuck/DayBookEvtxMacOS/issues/new")!
+    static let repo = URL(string: "https://github.com/thxStuck/DayBook")!
+    static let newIssue = URL(string: "https://github.com/thxStuck/DayBook/issues/new")!
     static var docs: URL {
         let lang = Bundle.main.preferredLocalizations.first == "ru" ? "ru/" : "en/"
-        return URL(string: "https://thxstuck.github.io/DayBookEvtxMacOS/" + lang)!
+        return URL(string: "https://thxstuck.github.io/DayBook/" + lang)!
     }
 }
 

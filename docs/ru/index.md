@@ -41,7 +41,7 @@ DayBookEvtxMacOS — нативное приложение для macOS для �
 
 ## Быстрый старт
 
-1. Скачайте приложение из [Releases](https://github.com/thxStuck/DayBookEvtxMacOS/releases/latest) и
+1. Скачайте приложение из [Releases](https://github.com/thxStuck/DayBook/releases/latest) и
    при первом запуске разрешите его открыть — см. [Установка и запуск](install.html).
 2. «Файл» → «Новый кейс из журналов…» (⌘N), выберите папку с журналами и место для кейса.
 3. Оставьте параметры импорта по умолчанию и нажмите «Начать импорт».

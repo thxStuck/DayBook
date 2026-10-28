@@ -15,7 +15,7 @@ A native macOS app for viewing and analysing Windows event logs (`.evtx`) and Li
 
 [Русская документация](ru/){: .btn .btn-primary .fs-5 .mb-4 .mb-md-0 .mr-2 }
 [English documentation](en/){: .btn .btn-primary .fs-5 .mb-4 .mb-md-0 .mr-2 }
-[Скачать · Download](https://github.com/thxStuck/DayBookEvtxMacOS/releases/latest){: .btn .fs-5 .mb-4 .mb-md-0 }
+[Скачать · Download](https://github.com/thxStuck/DayBook/releases/latest){: .btn .fs-5 .mb-4 .mb-md-0 }
 
 ---
 

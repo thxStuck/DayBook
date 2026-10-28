@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="../shared/style.css">
 </head>
 <body>
-<header class="top"><a href="index.html">Contents</a><a class="external" href="https://thxstuck.github.io/DayBookEvtxMacOS/en/">Documentation online</a></header>
+<header class="top"><a href="index.html">Contents</a><a class="external" href="https://thxstuck.github.io/DayBook/en/">Documentation online</a></header>
 <main>
 <h1 id="installation"><a name="installation"></a>Installation</h1>
 <nav class="toc"><ul><li><a href="#requirements">Requirements</a></li><li><a href="#installing-a-release">Installing a release</a></li><li class="sub"><a href="#first-launch">First launch</a></li><li class="sub"><a href="#folder-access">Folder access</a></li><li><a href="#interface-language">Interface language</a></li><li><a href="#help-and-about">Help and About</a></li><li><a href="#building-from-source">Building from source</a></li><li><a href="#where-things-are-kept">Where things are kept</a></li></ul></nav>
@@ -23,7 +23,7 @@
 </ul>
 <h2 id="installing-a-release"><a name="installing-a-release"></a>Installing a release</h2>
 <ol>
-<li>Open the <a href="https://github.com/thxStuck/DayBookEvtxMacOS/releases/latest" class="external">latest release</a> and download <code>DayBookEvtxMacOS-&lt;version&gt;-arm64.zip</code>.</li>
+<li>Open the <a href="https://github.com/thxStuck/DayBook/releases/latest" class="external">latest release</a> and download <code>DayBookEvtxMacOS-&lt;version&gt;-arm64.zip</code>.</li>
 <li>Unzip it and move <code>DayBookEvtxMacOS.app</code> to Applications.</li>
 <li>To verify the download, compare its SHA-256 with the value in the release notes:<pre><code>shasum -a 256 ~/Downloads/DayBookEvtxMacOS-*-arm64.zip</code></pre></li>
 </ol>
@@ -57,8 +57,8 @@
 <li><strong>DayBookEvtxMacOS → About DayBookEvtxMacOS</strong> shows the version, links and third-party components with their licences.</li>
 </ul>
 <h2 id="building-from-source"><a name="building-from-source"></a>Building from source</h2>
-<pre><code>git clone https://github.com/thxStuck/DayBookEvtxMacOS.git
-cd DayBookEvtxMacOS
+<pre><code>git clone https://github.com/thxStuck/DayBook.git
+cd DayBook
 scripts/build.sh
 open build/DayBookEvtxMacOS.app</code></pre>
 <p>The script builds:</p>

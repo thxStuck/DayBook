@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="../shared/style.css">
 </head>
 <body>
-<header class="top"><a href="index.html">Содержание</a><a class="external" href="https://thxstuck.github.io/DayBookEvtxMacOS/ru/">Документация на сайте</a></header>
+<header class="top"><a href="index.html">Содержание</a><a class="external" href="https://thxstuck.github.io/DayBook/ru/">Документация на сайте</a></header>
 <main>
 <h1 id="установка-и-запуск"><a name="установка-и-запуск"></a>Установка и запуск</h1>
 <nav class="toc"><ul><li><a href="#требования">Требования</a></li><li><a href="#установка-готовой-сборки">Установка готовой сборки</a></li><li class="sub"><a href="#первый-запуск">Первый запуск</a></li><li class="sub"><a href="#доступ-к-папкам">Доступ к папкам</a></li><li><a href="#язык-интерфейса">Язык интерфейса</a></li><li><a href="#справка-и-сведения-о-программе">Справка и сведения о программе</a></li><li><a href="#сборка-из-исходников">Сборка из исходников</a></li><li><a href="#где-что-хранится">Где что хранится</a></li></ul></nav>
@@ -23,7 +23,7 @@
 </ul>
 <h2 id="установка-готовой-сборки"><a name="установка-готовой-сборки"></a>Установка готовой сборки</h2>
 <ol>
-<li>Откройте <a href="https://github.com/thxStuck/DayBookEvtxMacOS/releases/latest" class="external">последний релиз</a> и скачайте архив <code>DayBookEvtxMacOS-&lt;версия&gt;-arm64.zip</code>.</li>
+<li>Откройте <a href="https://github.com/thxStuck/DayBook/releases/latest" class="external">последний релиз</a> и скачайте архив <code>DayBookEvtxMacOS-&lt;версия&gt;-arm64.zip</code>.</li>
 <li>Распакуйте архив и перенесите <code>DayBookEvtxMacOS.app</code> в «Программы».</li>
 <li>Если хотите проверить архив, сравните его SHA-256 со значением в описании релиза:<pre><code>shasum -a 256 ~/Downloads/DayBookEvtxMacOS-*-arm64.zip</code></pre></li>
 </ol>
@@ -57,8 +57,8 @@
 <li><strong>DayBookEvtxMacOS → О программе DayBookEvtxMacOS</strong> — версия, ссылки и сторонние компоненты с их лицензиями.</li>
 </ul>
 <h2 id="сборка-из-исходников"><a name="сборка-из-исходников"></a>Сборка из исходников</h2>
-<pre><code>git clone https://github.com/thxStuck/DayBookEvtxMacOS.git
-cd DayBookEvtxMacOS
+<pre><code>git clone https://github.com/thxStuck/DayBook.git
+cd DayBook
 scripts/build.sh
 open build/DayBookEvtxMacOS.app</code></pre>
 <p>Скрипт собирает:</p>

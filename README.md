@@ -4,8 +4,8 @@
 
 # DayBookEvtxMacOS
 
-**English** · [Русский](README.ru.md) · [Documentation](https://thxstuck.github.io/DayBookEvtxMacOS/en/) ·
-[Download](https://github.com/thxStuck/DayBookEvtxMacOS/releases/latest)
+**English** · [Русский](README.ru.md) · [Documentation](https://thxstuck.github.io/DayBook/en/) ·
+[Download](https://github.com/thxStuck/DayBook/releases/latest)
 
 A native macOS app for viewing and analysing Windows event logs (`.evtx`), SIEM-style. Pick a folder
 with logs (for example `C/Windows/System32/winevt/logs` from a triage collection) — every file is
@@ -47,7 +47,7 @@ Source files are opened read-only and never modified.
 
 ## Download
 
-The ready build for Apple Silicon is in [Releases](https://github.com/thxStuck/DayBookEvtxMacOS/releases/latest).
+The ready build for Apple Silicon is in [Releases](https://github.com/thxStuck/DayBook/releases/latest).
 Unzip it and move `DayBookEvtxMacOS.app` to Applications.
 
 The app is signed locally (ad hoc) and is not notarized by Apple, which needs a paid Developer ID.
@@ -74,7 +74,7 @@ Line Tools, the script uses `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Deve
 ## Documentation
 
 Full documentation in English and Russian is at
-[thxstuck.github.io/DayBookEvtxMacOS](https://thxstuck.github.io/DayBookEvtxMacOS/en/): cases and
+[thxstuck.github.io/DayBook](https://thxstuck.github.io/DayBook/en/): cases and
 import, working with events, the complete DQL reference, entities, sessions and processes, Sigma
 detections, export, how the app works, FAQ. The page sources are in [`docs/`](docs/).
 

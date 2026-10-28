@@ -78,6 +78,6 @@ An Intel build has not been tested; the release archive is for Apple Silicon onl
 
 ## How to report a bug or suggest an improvement
 
-Open an [issue on GitHub](https://github.com/thxStuck/DayBookEvtxMacOS/issues). Include the app and
+Open an [issue on GitHub](https://github.com/thxStuck/DayBook/issues). Include the app and
 macOS versions, the steps, what you expected and what happened. Do not attach logs with personal or
 confidential data.
