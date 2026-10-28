@@ -1,7 +1,7 @@
 ---
 title: FAQ and troubleshooting
 parent: English
-nav_order: 10
+nav_order: 11
 ---
 
 # FAQ and troubleshooting

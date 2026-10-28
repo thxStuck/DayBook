@@ -1407,12 +1407,12 @@
         }
       }
     },
-    "Анализ журналов Windows (.evtx) на macOS: поиск на языке DQL, таймлайн, хосты и пользователи, сеансы входа, деревья процессов и Sigma-детекты.": {
+    "Анализ журналов Windows (.evtx) и сборов Linux (UAC) на macOS: поиск на языке DQL, таймлайн, хосты и пользователи, сеансы входа, деревья процессов и Sigma-детекты.": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Windows event log (.evtx) analysis on macOS: DQL search, timeline, hosts and users, logon sessions, process trees and Sigma detections."
+            "value": "Analysis of Windows event logs (.evtx) and Linux collections (UAC) on macOS: DQL search, timeline, hosts and users, logon sessions, process trees and Sigma detections."
           }
         }
       }
@@ -2953,6 +2953,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Changes in /etc"
+          }
+        }
+      }
+    },
+    "Изменения в автозапуске и ключах SSH": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Changes to autostart and SSH keys"
           }
         }
       }

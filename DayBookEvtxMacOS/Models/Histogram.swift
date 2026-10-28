@@ -106,6 +106,7 @@ enum Presets {
             Preset(title: String(localized: "Файлы в /tmp, /var/tmp, /dev/shm"), query: "Action = file_time and (FilePath startswith /tmp/ or FilePath startswith /var/tmp/ or FilePath startswith /dev/shm/)"),
             Preset(title: String(localized: "Веб-корень /var/www"), query: "Action = file_time and FilePath startswith /var/www/ | group by FilePath"),
             Preset(title: String(localized: "Исполняемые файлы в домашних папках"), query: "Action = file_time and (FilePath startswith /home/ or FilePath startswith /root/) and Mode startswith -rwx"),
+            Preset(title: String(localized: "Изменения в автозапуске и ключах SSH"), query: "Action = file_time and MACB contains m and (FilePath startswith /etc/cron or FilePath startswith /var/spool/cron or FilePath startswith /etc/systemd/system or FilePath startswith /etc/rc.local or FilePath startswith /etc/ld.so.preload or FilePath startswith /etc/profile.d or FilePath startswith /etc/sudoers or FilePath contains authorized_keys)"),
         ]),
         (String(localized: "Сеть"), [
             Preset(title: String(localized: "Межсетевой экран (журнал ядра)"), query: "Action = firewall | group by SourceIp, DestinationPort, FirewallRule"),

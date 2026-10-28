@@ -10,7 +10,8 @@ permalink: /en/
 
 [Русская версия](../ru/)
 
-DayBookEvtxMacOS is a native macOS app for incident response with Windows event logs (`.evtx`).
+DayBookEvtxMacOS is a native macOS app for incident response with Windows event logs (`.evtx`)
+and UAC collections of Linux systems.
 It parses a folder of logs (for example `C/Windows/System32/winevt/logs` from a triage collection)
 into a case and lets you work with it like a SIEM: fast search, click-to-filter, a timeline,
 entities, sessions, processes and detections.
@@ -20,6 +21,9 @@ entities, sessions, processes and detections.
 - **Own EVTX parser** in Swift: every physical chunk, not only the ones listed in the stale file header;
   CRC checks; recovery of deleted records from slack space; copies of one record from the live log,
   shadow copies and slack merged into one event that lists every location.
+- **Linux (UAC collections)**: syslog, journald (including zstd), auditd, wtmp/btmp/lastlog, web
+  server logs, dpkg/apt, MySQL, shell histories and a file system timeline from the bodyfile — in one
+  case with the same search, filters and timeline. See [Linux (UAC collections)](linux.html).
 - **DQL query language** in the style of PDQL/KQL:
   `EventID = 4624 and LogonType in (3, 10) | group by IpAddress`. Queries run as set operations and
   never become SQL.

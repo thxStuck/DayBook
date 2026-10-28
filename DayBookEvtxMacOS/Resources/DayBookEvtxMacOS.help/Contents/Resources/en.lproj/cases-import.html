@@ -33,8 +33,9 @@
 <h2 id="creating-a-case"><a name="creating-a-case"></a>Creating a case</h2>
 <ol>
 <li>File → New Case from Logs… (⌘N).</li>
-<li>Choose one or more folders with logs and/or individual <code>.evtx</code> files.</li>
+<li>Choose one or more folders with logs and/or individual <code>.evtx</code> files — or an extracted UAC collection of a Linux system.</li>
 <li>Choose where to save the case. The default is <code>~/Documents/DayBook/&lt;source name&gt;.daybook</code>. If a case with that name exists, macOS asks whether to replace it.</li>
+<li>In the import options choose the system: <strong>Windows — .evtx logs</strong> or <strong>Linux — UAC collection</strong>. It is preselected from the folders' content; the sheet shows how many <code>.evtx</code> files and which UAC collections were found. Linux has its own page: <a href="linux.html">Linux (UAC collections)</a>.</li>
 <li>Check the import options and click Start Import.</li>
 </ol>
 <h3 id="import-options"><a name="import-options"></a>Import options</h3>
@@ -115,6 +116,12 @@
 <tr><td><code>invalidText</code></td><td>Invalid UTF-16; characters were replaced with U+FFFD</td></tr>
 <tr><td><code>hasCopies</code></td><td>Copies from other places were merged into this event</td></tr>
 <tr><td><code>afterGap</code></td><td>A live record after a damaged area of the chunk</td></tr>
+<tr><td><code>yearInferred</code></td><td>Linux: no year in the line, inferred from the file's date</td></tr>
+<tr><td><code>zoneAssumed</code></td><td>Linux: no zone in the line, the system's zone from <code>uac.log</code> assumed</td></tr>
+<tr><td><code>timeCarried</code></td><td>Linux: no time of its own — the time of a neighbouring record</td></tr>
+<tr><td><code>timeFromFile</code></td><td>Linux: no time of its own — the file's modification time</td></tr>
+<tr><td><code>unparsed</code></td><td>Linux: the line matched no format and is kept whole in <code>Message</code></td></tr>
+<tr><td><code>notDecompressed</code></td><td>Linux: a compressed value (journald) could not be unpacked</td></tr>
 </tbody></table>
 <p>Where flags are visible:</p>
 <ul>

@@ -37,10 +37,14 @@ the start screen. Close it with File → Close Case (⇧⌘W).
 ## Creating a case
 
 1. File → New Case from Logs… (⌘N).
-2. Choose one or more folders with logs and/or individual `.evtx` files.
+2. Choose one or more folders with logs and/or individual `.evtx` files — or an extracted UAC
+   collection of a Linux system.
 3. Choose where to save the case. The default is `~/Documents/DayBook/<source name>.daybook`.
    If a case with that name exists, macOS asks whether to replace it.
-4. Check the import options and click Start Import.
+4. In the import options choose the system: **Windows — .evtx logs** or **Linux — UAC collection**. It
+   is preselected from the folders' content; the sheet shows how many `.evtx` files and which UAC
+   collections were found. Linux has its own page: [Linux (UAC collections)](linux.html).
+5. Check the import options and click Start Import.
 
 ### Import options
 
@@ -148,6 +152,12 @@ file went into other events is shown in the "Copies merged" column of Case Infor
 | `invalidText` | Invalid UTF-16; characters were replaced with U+FFFD |
 | `hasCopies` | Copies from other places were merged into this event |
 | `afterGap` | A live record after a damaged area of the chunk |
+| `yearInferred` | Linux: no year in the line, inferred from the file's date |
+| `zoneAssumed` | Linux: no zone in the line, the system's zone from `uac.log` assumed |
+| `timeCarried` | Linux: no time of its own — the time of a neighbouring record |
+| `timeFromFile` | Linux: no time of its own — the file's modification time |
+| `unparsed` | Linux: the line matched no format and is kept whole in `Message` |
+| `notDecompressed` | Linux: a compressed value (journald) could not be unpacked |
 
 Where flags are visible:
 

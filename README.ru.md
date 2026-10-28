@@ -10,13 +10,18 @@
 Нативное приложение для macOS для просмотра и анализа журналов Windows (`.evtx`) в стиле SIEM:
 выбираете папку с журналами (например, `C/Windows/System32/winevt/logs` из триажа) — все файлы
 разбираются в кейс, дальше быстрый поиск, фильтры кликом, таймлайн, реестр хостов и пользователей,
-сеансы, дерево процессов и Sigma-детекты.
+сеансы, дерево процессов и Sigma-детекты. Поддержаны и Linux-системы: распакованный сбор
+[UAC](https://github.com/tclahr/uac) становится таким же кейсом.
 
 ## Возможности
 
 - **Собственный парсер EVTX** (Swift, без внешних библиотек): все физические чанки, а не только
   перечисленные в устаревшем заголовке; проверка CRC; восстановление удалённых записей из slack
   с флагом `carved`; объединение копий одной записи (живой журнал, VSS, slack) с указанием всех мест.
+- **Linux (сбор UAC)**: syslog, journald (свой декодер zstd), auditd, wtmp / btmp / lastlog,
+  веб-журналы, dpkg / apt, MySQL, истории оболочек и таймлайн файловой системы из bodyfile; сеансы по
+  wtmp, дерево процессов по auditd, экран «Система» с выводом команд и файлами автозапуска. Время без
+  года или пояса восстанавливается и помечается флагами.
 - **Язык запросов DQL** в стиле PDQL/KQL: `EventID = 4624 and LogonType in (3, 10) | group by IpAddress`.
   Запрос не превращается в SQL — выполняется как операции над множествами.
 - **Клик по значению** в таблице, деталях или сайдбаре добавляет фильтр `=` / `≠`.
@@ -79,6 +84,7 @@ open build/DayBookEvtxMacOS.app
 
 ```bash
 evtxdump ingest case.daybook /path/to/winevt/logs     # импорт в кейс
+evtxdump ingest linux.daybook /path/to/uac-collection  # распакованный сбор UAC (Linux)
 evtxdump dql case.daybook 'EventID = 4625 | group by IpAddress'
 evtxdump sigma case.daybook --pack DayBookEvtxMacOS/Resources/Rules/rules.json
 evtxdump export case.daybook out.xlsx 'EventID = 4688'

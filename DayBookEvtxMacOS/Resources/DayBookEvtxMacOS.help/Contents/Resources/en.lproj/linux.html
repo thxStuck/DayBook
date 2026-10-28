@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="anchors">
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="UAC (Unix-like Artifacts Collector) collects logs, configuration, command output and a file system timeline from a Linux system. DayBookEvtxMacOS parses an extracted UAC collection into a case and lets you work with it t">
+<meta name="keywords" content="What it is, Import, What is parsed, Time, Fields and Action, Sections of a Linux case, Limits">
+
+<title>Linux (UAC collections) — DayBookEvtxMacOS Help</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<header class="top"><a href="index.html">Contents</a><a class="external" href="https://thxstuck.github.io/DayBookEvtxMacOS/en/">Documentation online</a></header>
+<main>
+<h1 id="linux-uac-collections"><a name="linux-uac-collections"></a>Linux: UAC collections</h1>
+<nav class="toc"><ul><li><a href="#what-it-is">What it is</a></li><li><a href="#import">Import</a></li><li><a href="#what-is-parsed">What is parsed</a></li><li><a href="#time">Time</a></li><li><a href="#fields-and-action">Fields and <code>Action</code></a></li><li><a href="#sections-of-a-linux-case">Sections of a Linux case</a></li><li><a href="#limits">Limits</a></li></ul></nav>
+<h2 id="what-it-is"><a name="what-it-is"></a>What it is</h2>
+<p><a href="https://github.com/tclahr/uac" class="external">UAC</a> (Unix-like Artifacts Collector) collects logs, configuration, command output and a file system timeline from a Linux system. DayBookEvtxMacOS parses an <strong>extracted</strong> UAC collection into a case and lets you work with it the way you work with Windows logs: DQL search, click-to-filter, timeline, logs, entities, sessions and processes.</p>
+<p>Layout of a collection:</p>
+<table>
+<thead><tr><th>Path</th><th>Contents</th></tr></thead>
+<tbody>
+<tr><td><code>uac.log</code></td><td>UAC's own log: version, command line, OS, host, <strong>the system's time zone</strong></td></tr>
+<tr><td><code>[root]/…</code></td><td>copies of the system's files under their original paths (<code>/var/log</code>, <code>/etc</code>, home folders…)</td></tr>
+<tr><td><code>live_response/…</code></td><td>command output at collection time (processes, network, packages, disks…)</td></tr>
+<tr><td><code>bodyfile/bodyfile.txt</code></td><td>file system timeline (Sleuth Kit format)</td></tr>
+<tr><td><code>hash_executables/</code>, <code>system/</code>, <code>chkrootkit/</code>, <code>ssh/</code></td><td>hashes of executables, lists of suid / hidden / writable files and more</td></tr>
+</tbody></table>
+<h2 id="import"><a name="import"></a>Import</h2>
+<ol>
+<li><strong>File → New Case from Logs…</strong> (⌘N) and choose the collection folder (or a folder with several collections). Extract a <code>uac-*.tar.gz</code> archive first.</li>
+<li>In the import options choose <strong>Linux — UAC collection</strong>. It is preselected when the folders hold a UAC collection and no <code>.evtx</code> files. The sheet lists the collections found: host, UAC version, OS, time zone and collection time.</li>
+<li>Options: <strong>file system timeline (bodyfile)</strong> — up to four events per file of the system (millions on large servers); <strong>SHA-256 of source files</strong>.</li>
+</ol>
+<p>Source files are opened read-only. Symbolic links inside a collection are not followed: they point into the analysed system, not this Mac.</p>
+<p>From the command line: <code>evtxdump ingest case.daybook &lt;collection folder&gt; --linux</code> (without the flag, Linux is chosen when the folder holds a UAC collection and no <code>.evtx</code> files).</p>
+<h2 id="what-is-parsed"><a name="what-is-parsed"></a>What is parsed</h2>
+<p>Every file of <code>/var/log</code> is listed as a source ("Case Information"), parsed or not: empty files, binary files and unknown formats are shown with the reason.</p>
+<table>
+<thead><tr><th>Source</th><th>Format</th><th>What is extracted</th></tr></thead>
+<tbody>
+<tr><td><code>auth.log</code>, <code>syslog</code>, <code>kern.log</code>, <code>cron.log</code>, <code>messages</code>, <code>secure</code>…</td><td>syslog (RFC 3339 and classic BSD), rotations <code>.1</code>, <code>.gz</code>, <code>.xz</code></td><td>program and PID; for sshd, sudo, su, PAM, cron, systemd-logind, useradd/usermod/passwd and netfilter (UFW) lines: user, address, port, auth method, command, <code>Action</code></td></tr>
+<tr><td><code>/var/log/journal/**/*.journal</code></td><td>journald (regular and compact format, XZ, LZ4, <strong>zstd</strong> compression)</td><td>every field of the entry; <code>MESSAGE</code>, <code>PRIORITY</code>, <code>SYSLOG_IDENTIFIER</code>, <code>_PID</code>, <code>_HOSTNAME</code> go to the case's columns</td></tr>
+<tr><td><code>audit/audit.log</code></td><td>auditd</td><td>the records of one event (<code>msg=audit(time:serial)</code>) are merged; hex values decoded; the interpreted part after 0x1D becomes <code>…Name</code> fields (<code>AuidName</code>); the EXECVE command becomes <code>CommandLine</code></td></tr>
+<tr><td><code>wtmp</code>, <code>btmp</code>, <code>utmp</code>, <code>lastlog</code></td><td>glibc binary records</td><td>logins, logouts, boots, failed logins, last login (name from <code>/etc/passwd</code>)</td></tr>
+<tr><td><code>nginx/*</code>, <code>apache2/*</code>, <code>httpd/*</code></td><td>access (common/combined + <code>key=value</code> tail), JSON lines, error</td><td>client, method, URI, status, size, Referer, User-Agent</td></tr>
+<tr><td><code>*.jsonl</code> and JSON lines</td><td>JSON lines</td><td>every key (nested ones with dots), time from <code>ts</code>/<code>time</code>/<code>@timestamp</code>…</td></tr>
+<tr><td><code>dpkg.log</code>, <code>apt/history.log</code>, <code>apt/term.log</code></td><td>dpkg / apt</td><td>package installs, upgrades, removals; apt transactions with command and user</td></tr>
+<tr><td><code>mysql/general.log</code></td><td>MySQL/MariaDB general log</td><td>connections and queries</td></tr>
+<tr><td>"time + text" logs</td><td>a time stamp at the start of the line (ISO, nginx error, PHP, Apache error, YYMMDD, epoch)</td><td>level, PID, <code>key=value</code> pairs; lines without a time (stack traces) continue the message</td></tr>
+<tr><td><code>.bash_history</code>, <code>.zsh_history</code>, <code>fish_history</code>, mysql/psql/python histories…</td><td>shell histories</td><td>commands; time from <code>#epoch</code> (bash), zsh's extended format, fish</td></tr>
+<tr><td><code>bodyfile/bodyfile.txt</code></td><td>Sleuth Kit body</td><td>file times: equal times are one event with a MACB mark, as in <code>mactime</code></td></tr>
+</tbody></table>
+<h2 id="time"><a name="time"></a>Time</h2>
+<p>The case stores time in UTC and shows it in the chosen zone.</p>
+<ul>
+<li>A line with an offset (<code>2026-09-27T01:31:03+03:00</code>) has an exact time.</li>
+<li>A line without one (classic syslog, dpkg, nginx error) is read in **the system's time zone from <code>uac.log</code>**; the event is flagged <code>zoneAssumed</code>.</li>
+<li>Classic syslog (<code>Sep 27 01:31:03</code>) has no year. It is inferred from the file's modification time (from the bodyfile, else from the copy): the last line belongs to the year of the modification, a "December → January" step starts the next year. Flag <code>yearInferred</code>.</li>
+<li>A record without a time of its own (a line that could not be parsed; bash history before <code>HISTTIMEFORMAT</code> was set) gets the time of a neighbouring record (<code>timeCarried</code>) or the file's modification time (<code>timeFromFile</code>) and keeps its place in the file's order.</li>
+</ul>
+<p>The <strong>Data quality</strong> presets in the sidebar list all such events.</p>
+<h2 id="fields-and-action"><a name="fields-and-action"></a>Fields and <code>Action</code></h2>
+<p>Field names are CamelCase and match Windows fields where the meaning is the same: <code>TargetUserName</code>, <code>SubjectUserName</code> (with the host name as domain, so <code>root</code> of two machines stays two accounts), <code>IpAddress</code>, <code>WorkstationName</code>, <code>CommandLine</code>, <code>ProcessId</code>. Raw auditd and journald fields keep their names (<code>exe</code>, <code>auid</code>, <code>_SYSTEMD_UNIT</code>). A field whose name DQL treats as an alias (<code>host</code>, <code>user</code>, <code>time</code>…) is stored capitalised or renamed (<code>Host</code>, <code>UserName</code>, <code>TimeRaw</code>).</p>
+<p><code>Action</code> is a normalised action, the same across sources:</p>
+<table>
+<thead><tr><th>Group</th><th>Values</th></tr></thead>
+<tbody>
+<tr><td>Authentication</td><td><code>auth_success</code>, <code>auth_failure</code>, <code>invalid_user</code>, <code>user_not_allowed</code>, <code>too_many_auth_failures</code>, <code>key_accepted</code>, <code>auth_postponed</code></td></tr>
+<tr><td>Logins and sessions</td><td><code>login</code>, <code>logout</code>, <code>login_failed</code>, <code>last_login</code>, <code>session_opened</code>, <code>session_closed</code>, <code>session_start</code>, <code>session_end</code>, <code>logind_session_new</code>, <code>logind_session_logout</code>, <code>logind_session_removed</code>, <code>boot</code>, <code>shutdown</code>, <code>runlevel</code></td></tr>
+<tr><td>SSH connections</td><td><code>connection</code>, <code>connection_closed</code>, <code>connection_reset</code>, <code>disconnected</code>, <code>disconnect_received</code>, <code>preauth_timeout</code>, <code>no_identification</code>, <code>negotiation_failed</code>, <code>bad_banner</code>, <code>listening</code></td></tr>
+<tr><td>Privileges</td><td><code>sudo</code>, <code>sudo_denied</code>, <code>su</code>, <code>su_failed</code></td></tr>
+<tr><td>Accounts</td><td><code>user_added</code>, <code>user_deleted</code>, <code>user_modified</code>, <code>group_added</code>, <code>group_deleted</code>, <code>group_member_added</code>, <code>group_member_removed</code>, <code>password_changed</code></td></tr>
+<tr><td>Execution</td><td><code>process_exec</code> (auditd), <code>shell_command</code> (histories), <code>cron_command</code></td></tr>
+<tr><td>auditd</td><td><code>audit_config_change</code>, <code>audit_daemon_start</code>, <code>audit_daemon_end</code>, <code>service_start</code>, <code>service_stop</code>, <code>kernel_module</code>, <code>promiscuous_mode</code>, <code>abnormal_end</code></td></tr>
+<tr><td>Web, packages, databases</td><td><code>http_request</code>, <code>package_install</code>, <code>package_upgrade</code>, <code>package_remove</code>, <code>package_purge</code>, <code>package_configure</code>, <code>package_status</code>, <code>apt_transaction</code>, <code>apt_output</code>, <code>db_connect</code>, <code>db_query</code>…</td></tr>
+<tr><td>Other</td><td><code>firewall</code> (netfilter), <code>file_time</code> (bodyfile)</td></tr>
+</tbody></table>
+<p>Examples:</p>
+<pre><code>Action in (auth_failure, invalid_user) | group by IpAddress | sort count desc
+Action = process_exec and CommandLine contains wget
+Action = http_request and HttpStatus &gt;= 500 | group by Uri
+Action = file_time and FilePath startswith /etc/cron and MACB contains m</code></pre>
+<p>Linux user names are case-sensitive: <code>Root</code> tried by a scanner is not <code>root</code>.</p>
+<h2 id="sections-of-a-linux-case"><a name="sections-of-a-linux-case"></a>Sections of a Linux case</h2>
+<ul>
+<li><strong>Events</strong> and <strong>Timeline</strong> — as for Windows; a "Program" column instead of the Event ID.</li>
+<li><strong>Logs</strong> — the <code>/var/log</code> tree: a log opens whole with all its rotations, or one file at a time.</li>
+<li><strong>System</strong> — details from <code>uac.log</code>, <code>live_response</code> command output by group, UAC's lists, hashes and the collected configuration and autostart files (cron, systemd, sudoers, <code>authorized_keys</code>, profile, PAM, audit rules). Files are read from the collection folder on demand.</li>
+<li><strong>Hosts, Users, IP addresses</strong> — the entity registry.</li>
+<li><strong>Sessions</strong> — wtmp logins: login → logout on the same terminal or a reboot, as <code>last</code> reads them.</li>
+<li><strong>Processes</strong> — program launches from auditd. auditd writes only the PPID, so parent → child links are reconstructed heuristically and marked 🔗.</li>
+<li>In the event details the <strong>Record</strong> tab shows the original lines (all lines of an audit event or an apt transaction), <code>FIELD=value</code> lines of a journal entry, the decoded wtmp record; <strong>Hex</strong> shows the bytes.</li>
+</ul>
+<h2 id="limits"><a name="limits"></a>Limits</h2>
+<ul>
+<li>The collection must be extracted: <code>.tar.gz</code> and <code>.zip</code> archives are not opened.</li>
+<li>Sigma detections for Linux are not bundled yet: the Detections section is hidden in Linux cases.</li>
+<li>Binary logs (<code>mysql-bin.*</code>, <code>faillog</code>, <code>tallylog</code>) are only listed as sources.</li>
+<li>The records of one audit event are merged when they follow each other; records of different events mixed together give several events with the same <code>AuditId</code>.</li>
+<li>The time of lines without a zone or a year is reconstructed by the rules above and flagged — check it against events with an exact time.</li>
+</ul>
+</main>
+</body>
+</html>

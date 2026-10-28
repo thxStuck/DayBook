@@ -7,10 +7,10 @@ permalink: /
 # DayBookEvtxMacOS
 {: .fs-9 }
 
-Нативное приложение для macOS для просмотра и анализа журналов Windows (`.evtx`) в стиле SIEM.
+Нативное приложение для macOS для просмотра и анализа журналов Windows (`.evtx`) и сборов Linux (UAC) в стиле SIEM.
 {: .fs-6 .fw-300 }
 
-A native macOS app for viewing and analysing Windows event logs (`.evtx`), SIEM-style.
+A native macOS app for viewing and analysing Windows event logs (`.evtx`) and Linux collections (UAC), SIEM-style.
 {: .fs-6 .fw-300 }
 
 [Русская документация](ru/){: .btn .btn-primary .fs-5 .mb-4 .mb-md-0 .mr-2 }
@@ -31,7 +31,8 @@ A native macOS app for viewing and analysing Windows event logs (`.evtx`), SIEM-
 - реестр хостов, пользователей и IP-адресов;
 - сеансы входа и RDP, деревья процессов;
 - Sigma-детекты по правилам SigmaHQ и Hayabusa;
-- экспорт в CSV, JSON Lines и XLSX.
+- экспорт в CSV, JSON Lines и XLSX;
+- Linux: распакованный сбор UAC — syslog, journald, auditd, wtmp, веб-журналы, истории оболочек, таймлайн файлов.
 
 Исходные файлы только читаются. Всё, что приложение восстановило, предположило или пропустило, помечено.
 
@@ -47,7 +48,8 @@ every file into a case, which gives you:
 - a registry of hosts, users and IP addresses;
 - logon and RDP sessions and process trees;
 - Sigma detections with the SigmaHQ and Hayabusa rules;
-- export to CSV, JSON Lines and XLSX.
+- export to CSV, JSON Lines and XLSX;
+- Linux: an extracted UAC collection — syslog, journald, auditd, wtmp, web logs, shell histories, file timeline.
 
 Source files are only read. Everything the app recovered, guessed or skipped is marked.
 

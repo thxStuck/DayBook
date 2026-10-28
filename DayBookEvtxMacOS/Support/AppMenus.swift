@@ -30,7 +30,7 @@ enum AboutPanel {
             if let link { attributes[.link] = link }
             text.append(NSAttributedString(string: s, attributes: attributes))
         }
-        add(String(localized: "Анализ журналов Windows (.evtx) на macOS: поиск на языке DQL, таймлайн, хосты и пользователи, сеансы входа, деревья процессов и Sigma-детекты.") + "\n\n")
+        add(String(localized: "Анализ журналов Windows (.evtx) и сборов Linux (UAC) на macOS: поиск на языке DQL, таймлайн, хосты и пользователи, сеансы входа, деревья процессов и Sigma-детекты.") + "\n\n")
         add(String(localized: "Документация"), link: AppLinks.docs)
         add("  ·  ")
         add(String(localized: "Исходный код"), link: AppLinks.repo)

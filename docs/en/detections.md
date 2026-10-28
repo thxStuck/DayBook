@@ -1,7 +1,7 @@
 ---
 title: Sigma detections
 parent: English
-nav_order: 7
+nav_order: 8
 ---
 
 # Sigma detections

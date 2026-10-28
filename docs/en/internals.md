@@ -1,7 +1,7 @@
 ---
 title: How it works
 parent: English
-nav_order: 9
+nav_order: 10
 ---
 
 # How it works

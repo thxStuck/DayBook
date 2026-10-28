@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="anchors">
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="UAC (Unix-like Artifacts Collector) собирает с Linux-системы журналы, настройки, вывод команд и таймлайн файловой системы. DayBookEvtxMacOS разбирает распакованный сбор UAC в кейс и даёт работать с ним так же, как с журн">
+<meta name="keywords" content="Что это, Импорт, Что разбирается, Время, Поля и Action, Разделы Linux-кейса, Ограничения">
+
+<title>Linux (сбор UAC) — Справка DayBookEvtxMacOS</title>
+<link rel="stylesheet" href="../shared/style.css">
+</head>
+<body>
+<header class="top"><a href="index.html">Содержание</a><a class="external" href="https://thxstuck.github.io/DayBookEvtxMacOS/ru/">Документация на сайте</a></header>
+<main>
+<h1 id="linux-сбор-uac"><a name="linux-сбор-uac"></a>Linux: сбор UAC</h1>
+<nav class="toc"><ul><li><a href="#что-это">Что это</a></li><li><a href="#импорт">Импорт</a></li><li><a href="#что-разбирается">Что разбирается</a></li><li><a href="#время">Время</a></li><li><a href="#поля-и-action">Поля и <code>Action</code></a></li><li><a href="#разделы-linux-кейса">Разделы Linux-кейса</a></li><li><a href="#ограничения">Ограничения</a></li></ul></nav>
+<h2 id="что-это"><a name="что-это"></a>Что это</h2>
+<p><a href="https://github.com/tclahr/uac" class="external">UAC</a> (Unix-like Artifacts Collector) собирает с Linux-системы журналы, настройки, вывод команд и таймлайн файловой системы. DayBookEvtxMacOS разбирает <strong>распакованный</strong> сбор UAC в кейс и даёт работать с ним так же, как с журналами Windows: поиск DQL, фильтры кликом, таймлайн, журналы, сущности, сеансы и процессы.</p>
+<p>Структура сбора:</p>
+<table>
+<thead><tr><th>Путь</th><th>Что там</th></tr></thead>
+<tbody>
+<tr><td><code>uac.log</code></td><td>журнал самого UAC: версия, командная строка, ОС, хост, <strong>часовой пояс системы</strong></td></tr>
+<tr><td><code>[root]/…</code></td><td>копии файлов системы под исходными путями (<code>/var/log</code>, <code>/etc</code>, домашние папки…)</td></tr>
+<tr><td><code>live_response/…</code></td><td>вывод команд на момент сбора (процессы, сеть, пакеты, диски…)</td></tr>
+<tr><td><code>bodyfile/bodyfile.txt</code></td><td>таймлайн файловой системы (формат Sleuth Kit)</td></tr>
+<tr><td><code>hash_executables/</code>, <code>system/</code>, <code>chkrootkit/</code>, <code>ssh/</code></td><td>хеши исполняемых файлов, списки suid/скрытых/доступных на запись файлов и др.</td></tr>
+</tbody></table>
+<h2 id="импорт"><a name="импорт"></a>Импорт</h2>
+<ol>
+<li><strong>Файл → Новый кейс из журналов…</strong> (⌘N), выберите папку сбора (или папку, где лежат несколько сборов). Архив <code>uac-*.tar.gz</code> сначала распакуйте.</li>
+<li>В окне параметров выберите систему <strong>Linux — сбор UAC</strong>. Тип подставляется сам: если в папках есть сбор UAC и нет файлов <code>.evtx</code>, выбран Linux. Там же видно, какие сборы найдены: хост, версия UAC, ОС, часовой пояс, время сбора.</li>
+<li>Параметры: <strong>таймлайн файловой системы (bodyfile)</strong> — до четырёх событий на каждый файл системы (на больших серверах это миллионы событий); <strong>SHA-256 исходных файлов</strong>.</li>
+</ol>
+<p>Исходные файлы открываются только для чтения. Символьные ссылки внутри сбора не разыменовываются: они указывают в исследуемую систему, а не на этот Mac.</p>
+<p>Из командной строки: <code>evtxdump ingest case.daybook &lt;папка сбора&gt; --linux</code> (без флага Linux выбирается, если в папке есть сбор UAC и нет <code>.evtx</code>).</p>
+<h2 id="что-разбирается"><a name="что-разбирается"></a>Что разбирается</h2>
+<p>Каждый файл <code>/var/log</code> попадает в список источников («Сведения о кейсе»), даже если не разобран: пустые, двоичные и файлы неизвестного формата видны с причиной.</p>
+<table>
+<thead><tr><th>Источник</th><th>Формат</th><th>Что извлекается</th></tr></thead>
+<tbody>
+<tr><td><code>auth.log</code>, <code>syslog</code>, <code>kern.log</code>, <code>cron.log</code>, <code>messages</code>, <code>secure</code>…</td><td>syslog (RFC 3339 и классический BSD), ротации <code>.1</code>, <code>.gz</code>, <code>.xz</code></td><td>программа и PID; для sshd, sudo, su, PAM, cron, systemd-logind, useradd/usermod/passwd, правил netfilter (UFW) — пользователь, адрес, порт, способ входа, команда, <code>Action</code></td></tr>
+<tr><td><code>/var/log/journal/**/*.journal</code></td><td>journald (обычный и компактный формат, сжатие XZ, LZ4, <strong>zstd</strong>)</td><td>все поля записи; <code>MESSAGE</code>, <code>PRIORITY</code>, <code>SYSLOG_IDENTIFIER</code>, <code>_PID</code>, <code>_HOSTNAME</code> — в колонки кейса</td></tr>
+<tr><td><code>audit/audit.log</code></td><td>auditd</td><td>записи одного события (<code>msg=audit(время:номер)</code>) объединяются; hex-значения декодируются; расшифровка после 0x1D — поля <code>…Name</code> (<code>AuidName</code>); команда EXECVE — <code>CommandLine</code></td></tr>
+<tr><td><code>wtmp</code>, <code>btmp</code>, <code>utmp</code>, <code>lastlog</code></td><td>двоичные записи glibc</td><td>входы, выходы, загрузки, неудачные входы, последний вход (имя по <code>/etc/passwd</code>)</td></tr>
+<tr><td><code>nginx/*</code>, <code>apache2/*</code>, <code>httpd/*</code></td><td>access (common/combined + хвост <code>key=value</code>), JSON lines, error</td><td>клиент, метод, URI, статус, размер, Referer, User-Agent</td></tr>
+<tr><td><code>*.jsonl</code> и строки-JSON</td><td>JSON lines</td><td>все ключи (вложенные — через точку), время по <code>ts</code>/<code>time</code>/<code>@timestamp</code>…</td></tr>
+<tr><td><code>dpkg.log</code>, <code>apt/history.log</code>, <code>apt/term.log</code></td><td>dpkg / apt</td><td>установка, обновление, удаление пакетов; транзакции apt с командой и пользователем</td></tr>
+<tr><td><code>mysql/general.log</code></td><td>общий журнал MySQL/MariaDB</td><td>подключения и запросы</td></tr>
+<tr><td>журналы вида «время + текст»</td><td>время в начале строки (ISO, nginx error, PHP, Apache error, YYMMDD, epoch)</td><td>уровень, PID, пары <code>key=value</code>; строки без времени (стек вызовов) — продолжение сообщения</td></tr>
+<tr><td><code>.bash_history</code>, <code>.zsh_history</code>, <code>fish_history</code>, истории mysql/psql/python…</td><td>истории оболочек</td><td>команды; время из <code>#epoch</code> (bash), расширенного формата zsh, fish</td></tr>
+<tr><td><code>bodyfile/bodyfile.txt</code></td><td>Sleuth Kit body</td><td>времена файлов: совпадающие времена — одно событие с меткой MACB, как в <code>mactime</code></td></tr>
+</tbody></table>
+<h2 id="время"><a name="время"></a>Время</h2>
+<p>В кейсе время хранится в UTC; отображается в выбранном поясе.</p>
+<ul>
+<li>Строка с поясом (<code>2026-09-27T01:31:03+03:00</code>) — время точное.</li>
+<li>Строка без пояса (классический syslog, dpkg, nginx error) — берётся **часовой пояс системы из <code>uac.log</code>**, событие помечается флагом <code>zoneAssumed</code>.</li>
+<li>В классическом syslog (<code>Sep 27 01:31:03</code>) нет года. Он восстанавливается по времени изменения файла (из bodyfile, иначе — копии): последняя строка относится к году изменения файла, переход «декабрь → январь» — к следующему году. Флаг <code>yearInferred</code>.</li>
+<li>Запись без своего времени (строка, которую не удалось разобрать; история bash до включения <code>HISTTIMEFORMAT</code>) получает время соседней записи (<code>timeCarried</code>) или время изменения файла (<code>timeFromFile</code>) и сохраняет своё место в порядке файла.</li>
+</ul>
+<p>Пресет <strong>Качество данных</strong> в боковой панели показывает все такие события.</p>
+<h2 id="поля-и-action"><a name="поля-и-action"></a>Поля и <code>Action</code></h2>
+<p>Имена полей — CamelCase и совпадают с полями Windows там, где смысл тот же: <code>TargetUserName</code>, <code>SubjectUserName</code> (с доменом = имя хоста, чтобы <code>root</code> разных машин не сливался), <code>IpAddress</code>, <code>WorkstationName</code>, <code>CommandLine</code>, <code>ProcessId</code>. Сырые поля auditd и journald сохраняют свои имена (<code>exe</code>, <code>auid</code>, <code>_SYSTEMD_UNIT</code>). Поле, имя которого DQL считает псевдонимом (<code>host</code>, <code>user</code>, <code>time</code>…), хранится с заглавной буквы или переименовано (<code>Host</code>, <code>UserName</code>, <code>TimeRaw</code>).</p>
+<p><code>Action</code> — нормализованное действие, одно для всех источников:</p>
+<table>
+<thead><tr><th>Группа</th><th>Значения</th></tr></thead>
+<tbody>
+<tr><td>Аутентификация</td><td><code>auth_success</code>, <code>auth_failure</code>, <code>invalid_user</code>, <code>user_not_allowed</code>, <code>too_many_auth_failures</code>, <code>key_accepted</code>, <code>auth_postponed</code></td></tr>
+<tr><td>Входы и сеансы</td><td><code>login</code>, <code>logout</code>, <code>login_failed</code>, <code>last_login</code>, <code>session_opened</code>, <code>session_closed</code>, <code>session_start</code>, <code>session_end</code>, <code>logind_session_new</code>, <code>logind_session_logout</code>, <code>logind_session_removed</code>, <code>boot</code>, <code>shutdown</code>, <code>runlevel</code></td></tr>
+<tr><td>SSH-соединения</td><td><code>connection</code>, <code>connection_closed</code>, <code>connection_reset</code>, <code>disconnected</code>, <code>disconnect_received</code>, <code>preauth_timeout</code>, <code>no_identification</code>, <code>negotiation_failed</code>, <code>bad_banner</code>, <code>listening</code></td></tr>
+<tr><td>Привилегии</td><td><code>sudo</code>, <code>sudo_denied</code>, <code>su</code>, <code>su_failed</code></td></tr>
+<tr><td>Учётные записи</td><td><code>user_added</code>, <code>user_deleted</code>, <code>user_modified</code>, <code>group_added</code>, <code>group_deleted</code>, <code>group_member_added</code>, <code>group_member_removed</code>, <code>password_changed</code></td></tr>
+<tr><td>Выполнение</td><td><code>process_exec</code> (auditd), <code>shell_command</code> (истории), <code>cron_command</code></td></tr>
+<tr><td>auditd</td><td><code>audit_config_change</code>, <code>audit_daemon_start</code>, <code>audit_daemon_end</code>, <code>service_start</code>, <code>service_stop</code>, <code>kernel_module</code>, <code>promiscuous_mode</code>, <code>abnormal_end</code></td></tr>
+<tr><td>Веб, пакеты, БД</td><td><code>http_request</code>, <code>package_install</code>, <code>package_upgrade</code>, <code>package_remove</code>, <code>package_purge</code>, <code>package_configure</code>, <code>package_status</code>, <code>apt_transaction</code>, <code>apt_output</code>, <code>db_connect</code>, <code>db_query</code>…</td></tr>
+<tr><td>Прочее</td><td><code>firewall</code> (netfilter), <code>file_time</code> (bodyfile)</td></tr>
+</tbody></table>
+<p>Примеры:</p>
+<pre><code>Action in (auth_failure, invalid_user) | group by IpAddress | sort count desc
+Action = process_exec and CommandLine contains wget
+Action = http_request and HttpStatus &gt;= 500 | group by Uri
+Action = file_time and FilePath startswith /etc/cron and MACB contains m</code></pre>
+<p>Имена пользователей Linux различаются регистром: <code>Root</code>, которого пробовал сканер, — не <code>root</code>.</p>
+<h2 id="разделы-linux-кейса"><a name="разделы-linux-кейса"></a>Разделы Linux-кейса</h2>
+<ul>
+<li><strong>События</strong> и <strong>Таймлайн</strong> — как для Windows; колонка «Программа» вместо Event ID.</li>
+<li><strong>Журналы</strong> — дерево <code>/var/log</code>: журнал открывается целиком со всеми ротациями или по одному файлу.</li>
+<li><strong>Система</strong> — сведения из <code>uac.log</code>, вывод команд <code>live_response</code> по группам, списки UAC, хеши и собранные файлы настроек и автозапуска (cron, systemd, sudoers, <code>authorized_keys</code>, profile, PAM, правила auditd). Файлы читаются из папки сбора по запросу.</li>
+<li><strong>Хосты, пользователи, IP</strong> — реестр сущностей.</li>
+<li><strong>Сеансы</strong> — входы из wtmp: вход → выход на том же терминале или перезагрузка, как в <code>last</code>.</li>
+<li><strong>Процессы</strong> — запуски программ из auditd. auditd пишет только PPID, поэтому связь «родитель → потомок» восстанавливается эвристически и помечена значком 🔗.</li>
+<li>В деталях события вкладка <strong>Запись</strong> показывает исходные строки (для события auditd и транзакции apt — все строки), для journald — поля <code>FIELD=value</code>, для wtmp — расшифровку записи; <strong>Hex</strong> — байты.</li>
+</ul>
+<h2 id="ограничения"><a name="ограничения"></a>Ограничения</h2>
+<ul>
+<li>Нужен распакованный сбор: архивы <code>.tar.gz</code> и <code>.zip</code> не открываются.</li>
+<li>Sigma-детекты для Linux пока не входят в поставку: раздел «Детекты» в Linux-кейсе скрыт.</li>
+<li>Двоичные журналы (<code>mysql-bin.*</code>, <code>faillog</code>, <code>tallylog</code>) только перечисляются в источниках.</li>
+<li>Записи auditd одного события объединяются, если идут подряд; при перемешивании записей разных событий получится несколько событий с одним <code>AuditId</code>.</li>
+<li>Время строк без пояса и года восстановлено по правилам выше и помечено флагами — проверяйте его по событиям с точным временем.</li>
+</ul>
+</main>
+</body>
+</html>

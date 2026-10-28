@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="robots" content="anchors">
 <meta name="color-scheme" content="light dark">
-<meta name="description" content="DayBookEvtxMacOS is a native macOS app for incident response with Windows event logs (.evtx). It parses a folder of logs (for example C/Windows/System32/winevt/logs from a triage collection) into a case and lets you work">
+<meta name="description" content="DayBookEvtxMacOS is a native macOS app for incident response with Windows event logs (.evtx) and UAC collections of Linux systems. It parses a folder of logs (for example C/Windows/System32/winevt/logs from a triage coll">
 <meta name="keywords" content="Features, Quick start, Contents">
 <meta name="AppleTitle" content="DayBookEvtxMacOS Help">
 <title>DayBookEvtxMacOS Help</title>
@@ -14,10 +14,11 @@
 <header class="top"><a class="external" href="https://thxstuck.github.io/DayBookEvtxMacOS/en/">Documentation online</a></header>
 <main>
 <h1 id="daybookevtxmacos-documentation"><a name="daybookevtxmacos-documentation"></a>DayBookEvtxMacOS documentation</h1>
-<p>DayBookEvtxMacOS is a native macOS app for incident response with Windows event logs (<code>.evtx</code>). It parses a folder of logs (for example <code>C/Windows/System32/winevt/logs</code> from a triage collection) into a case and lets you work with it like a SIEM: fast search, click-to-filter, a timeline, entities, sessions, processes and detections.</p>
+<p>DayBookEvtxMacOS is a native macOS app for incident response with Windows event logs (<code>.evtx</code>) and UAC collections of Linux systems. It parses a folder of logs (for example <code>C/Windows/System32/winevt/logs</code> from a triage collection) into a case and lets you work with it like a SIEM: fast search, click-to-filter, a timeline, entities, sessions, processes and detections.</p>
 <h2 id="features"><a name="features"></a>Features</h2>
 <ul>
 <li><strong>Own EVTX parser</strong> in Swift: every physical chunk, not only the ones listed in the stale file header; CRC checks; recovery of deleted records from slack space; copies of one record from the live log, shadow copies and slack merged into one event that lists every location.</li>
+<li><strong>Linux (UAC collections)</strong>: syslog, journald (including zstd), auditd, wtmp/btmp/lastlog, web server logs, dpkg/apt, MySQL, shell histories and a file system timeline from the bodyfile — in one case with the same search, filters and timeline. See <a href="linux.html">Linux (UAC collections)</a>.</li>
 <li><strong>DQL query language</strong> in the style of PDQL/KQL: <code>EventID = 4624 and LogonType in (3, 10) | group by IpAddress</code>. Queries run as set operations and never become SQL.</li>
 <li><strong>Click-to-filter</strong> on any value in the table, the details and the sidebar.</li>
 <li><strong>Display time zone</strong>: UTC, a fixed offset or an IANA zone; the case stores time in UTC.</li>

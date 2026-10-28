@@ -10,13 +10,18 @@
 A native macOS app for viewing and analysing Windows event logs (`.evtx`), SIEM-style. Pick a folder
 with logs (for example `C/Windows/System32/winevt/logs` from a triage collection) — every file is
 parsed into a case, and you get fast search, click-to-filter, a timeline, a registry of hosts and
-users, logon sessions, process trees and Sigma detections.
+users, logon sessions, process trees and Sigma detections. Linux systems are covered too: an extracted
+[UAC](https://github.com/tclahr/uac) collection becomes the same kind of case.
 
 ## Features
 
 - **Own EVTX parser** (Swift, no external libraries): every physical chunk, not only those listed in a
   stale header; CRC checks; recovery of deleted records from slack space with a `carved` flag; copies
   of one record (live log, VSS, slack) merged into one event that lists every location.
+- **Linux (UAC collections)**: syslog, journald (with an own zstd decoder), auditd, wtmp / btmp /
+  lastlog, web server logs, dpkg / apt, MySQL, shell histories and the file system timeline from the
+  bodyfile; sessions from wtmp, process trees from auditd, a System screen with the collected command
+  output and autostart files. Times without a year or zone are reconstructed and flagged.
 - **DQL query language** in the style of PDQL/KQL:
   `EventID = 4624 and LogonType in (3, 10) | group by IpAddress`. Queries run as set operations and
   never become SQL.
@@ -79,6 +84,7 @@ detections, export, how the app works, FAQ. The page sources are in [`docs/`](do
 
 ```bash
 evtxdump ingest case.daybook /path/to/winevt/logs     # import into a case
+evtxdump ingest linux.daybook /path/to/uac-collection  # an extracted UAC collection (Linux)
 evtxdump dql case.daybook 'EventID = 4625 | group by IpAddress'
 evtxdump sigma case.daybook --pack DayBookEvtxMacOS/Resources/Rules/rules.json
 evtxdump export case.daybook out.xlsx 'EventID = 4688'

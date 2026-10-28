@@ -33,8 +33,9 @@
 <h2 id="создание-кейса"><a name="создание-кейса"></a>Создание кейса</h2>
 <ol>
 <li>«Файл» → «Новый кейс из журналов…» (⌘N).</li>
-<li>Выберите одну или несколько папок с журналами и/или отдельные файлы <code>.evtx</code>.</li>
+<li>Выберите одну или несколько папок с журналами и/или отдельные файлы <code>.evtx</code> — или распакованный сбор UAC с Linux-системы.</li>
 <li>Укажите, где сохранить кейс. По умолчанию — <code>~/Documents/DayBook/&lt;имя источника&gt;.daybook</code>. Если кейс с таким именем уже есть, macOS спросит, заменить ли его.</li>
+<li>В параметрах импорта выберите систему: <strong>Windows — журналы .evtx</strong> или <strong>Linux — сбор UAC</strong>. Тип подставляется по содержимому папок; там же видно, сколько найдено файлов <code>.evtx</code> и какие сборы UAC. Про Linux — отдельная страница: <a href="linux.html">Linux (сбор UAC)</a>.</li>
 <li>Проверьте параметры импорта и нажмите «Начать импорт».</li>
 </ol>
 <h3 id="параметры-импорта"><a name="параметры-импорта"></a>Параметры импорта</h3>
@@ -115,6 +116,12 @@
 <tr><td><code>invalidText</code></td><td>Некорректный UTF-16: символы заменены на U+FFFD</td></tr>
 <tr><td><code>hasCopies</code></td><td>К событию объединены копии из других мест</td></tr>
 <tr><td><code>afterGap</code></td><td>Живая запись после повреждённого участка чанка</td></tr>
+<tr><td><code>yearInferred</code></td><td>Linux: в строке нет года, он восстановлен по дате файла</td></tr>
+<tr><td><code>zoneAssumed</code></td><td>Linux: в строке нет пояса, принят пояс системы из <code>uac.log</code></td></tr>
+<tr><td><code>timeCarried</code></td><td>Linux: своего времени нет — время соседней записи</td></tr>
+<tr><td><code>timeFromFile</code></td><td>Linux: своего времени нет — время изменения файла</td></tr>
+<tr><td><code>unparsed</code></td><td>Linux: строка не подошла ни к одному формату и сохранена целиком в <code>Message</code></td></tr>
+<tr><td><code>notDecompressed</code></td><td>Linux: сжатое значение (journald) не удалось распаковать</td></tr>
 </tbody></table>
 <p>Где видны флаги:</p>
 <ul>

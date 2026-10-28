@@ -1,7 +1,7 @@
 ---
 title: Sigma-детекты
 parent: Русский
-nav_order: 7
+nav_order: 8
 ---
 
 # Sigma-детекты

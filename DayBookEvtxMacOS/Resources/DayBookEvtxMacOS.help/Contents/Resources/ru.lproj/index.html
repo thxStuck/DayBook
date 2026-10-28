@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="robots" content="anchors">
 <meta name="color-scheme" content="light dark">
-<meta name="description" content="DayBookEvtxMacOS — нативное приложение для macOS для расследования инцидентов по журналам Windows (.evtx). Оно разбирает папку с журналами (например, C/Windows/System32/winevt/logs из триажа) в кейс и даёт работать с ним">
+<meta name="description" content="DayBookEvtxMacOS — нативное приложение для macOS для расследования инцидентов по журналам Windows (.evtx) и сборам UAC с Linux-систем. Оно разбирает папку с журналами (например, C/Windows/System32/winevt/logs из триажа) ">
 <meta name="keywords" content="Возможности, Быстрый старт, Разделы документации">
 <meta name="AppleTitle" content="Справка DayBookEvtxMacOS">
 <title>Справка DayBookEvtxMacOS</title>
@@ -14,10 +14,11 @@
 <header class="top"><a class="external" href="https://thxstuck.github.io/DayBookEvtxMacOS/ru/">Документация на сайте</a></header>
 <main>
 <h1 id="документация-daybookevtxmacos"><a name="документация-daybookevtxmacos"></a>Документация DayBookEvtxMacOS</h1>
-<p>DayBookEvtxMacOS — нативное приложение для macOS для расследования инцидентов по журналам Windows (<code>.evtx</code>). Оно разбирает папку с журналами (например, <code>C/Windows/System32/winevt/logs</code> из триажа) в кейс и даёт работать с ним, как с SIEM: быстрый поиск, фильтры кликом, таймлайн, сущности, сеансы, процессы и детекты.</p>
+<p>DayBookEvtxMacOS — нативное приложение для macOS для расследования инцидентов по журналам Windows (<code>.evtx</code>) и сборам UAC с Linux-систем. Оно разбирает папку с журналами (например, <code>C/Windows/System32/winevt/logs</code> из триажа) в кейс и даёт работать с ним, как с SIEM: быстрый поиск, фильтры кликом, таймлайн, сущности, сеансы, процессы и детекты.</p>
 <h2 id="возможности"><a name="возможности"></a>Возможности</h2>
 <ul>
 <li><strong>Собственный парсер EVTX</strong> на Swift: все физические чанки, а не только перечисленные в заголовке; проверка CRC; восстановление удалённых записей из slack; объединение копий одной записи из живого журнала, теневых копий и slack с указанием всех мест.</li>
+<li><strong>Linux (сбор UAC)</strong>: syslog, journald (включая zstd), auditd, wtmp/btmp/lastlog, веб-журналы, dpkg/apt, MySQL, истории оболочек и таймлайн файловой системы из bodyfile — в одном кейсе с теми же поиском, фильтрами и таймлайном. Подробно — <a href="linux.html">Linux (сбор UAC)</a>.</li>
 <li><strong>Язык запросов DQL</strong> в стиле PDQL/KQL: <code>EventID = 4624 and LogonType in (3, 10) | group by IpAddress</code>. Запрос выполняется как операции над множествами и никогда не превращается в SQL.</li>
 <li><strong>Фильтры кликом</strong> по любому значению в таблице, деталях и боковой панели.</li>
 <li><strong>Часовой пояс отображения</strong> — UTC, фиксированное смещение или зона IANA; в кейсе время хранится в UTC.</li>
