@@ -22,15 +22,38 @@ nav_order: 8
 
 | Набор | Правил | Версия | Лицензия |
 |---|---|---|---|
-| [SigmaHQ](https://github.com/SigmaHQ/sigma) | 2554 | Release 2026-07-09, r2026-04-01-50-g552f3fee4 | Detection Rule License 1.1 |
-| [Hayabusa rules](https://github.com/Yamato-Security/hayabusa-rules) | 194 | ветка main | Detection Rule License 1.1 |
+| [SigmaHQ](https://github.com/SigmaHQ/sigma) | 2554 для Windows, 183 для Linux | релиз r2026-07-01 от 2026-07-09 | Detection Rule License 1.1 |
+| [Hayabusa rules](https://github.com/Yamato-Security/hayabusa-rules) | 196 (Windows) | коммит 97b3fd9 от 2026-10-28 | Detection Rule License 1.1 |
 
-- Из SigmaHQ взяты правила `rules/windows/**`, а также правила с `product: windows` из `rules/` и
-  `rules-emerging-threats/`. Из Hayabusa — `hayabusa/**` (их копии правил SigmaHQ из папки `sigma/`
-  не берутся).
-- Вместе с правилами Hayabusa поставляются 248 псевдонимов полей Hayabusa.
+- Из SigmaHQ взяты правила `rules/windows/**` и `rules/linux/**`, а также правила с
+  `product: windows` или `product: linux` из `rules/` и `rules-emerging-threats/`. Из Hayabusa —
+  `hayabusa/**` (их копии правил SigmaHQ из папки `sigma/` не берутся).
+- Вместе с правилами Hayabusa поставляются псевдонимы полей Hayabusa (`config/eventkey_alias.txt`).
+- К кейсу применяются правила его системы: к Windows-кейсу — правила Windows и Hayabusa, к
+  Linux-кейсу — правила Linux. Сколько правил другой системы пропущено, видно в сведениях о прогоне.
 - Автор каждого правила показывается рядом с каждым срабатыванием. Наборы, версии и полный текст
   DRL 1.1 — в меню «Правила» → «Наборы правил и лицензии…».
+
+### Обновление правил
+
+Кнопка **«Обновить Sigma-правила»** на экране «Детекты»:
+
+1. Приложение сверяет установленный набор с последним релизом SigmaHQ и последним коммитом
+   правил Hayabusa на GitHub и показывает обе версии.
+2. Если на GitHub новее — показывает, что будет скачано (архив `sigma_all_rules.zip` из релиза
+   SigmaHQ и архив правил Hayabusa этого коммита, с размером), и по кнопке «Скачать и установить»
+   скачивает их.
+3. SHA-256 архива SigmaHQ сверяется с опубликованным GitHub; затем собирается новый набор правил,
+   проверяется (правила должны загрузиться, их число — правдоподобным) и только после этого
+   устанавливается в `~/Library/Application Support/<приложение>/Rules/rules.json`.
+4. «Запустить детекты заново» — прогон по новым правилам.
+
+Версия каждого набора, дата релиза или коммита и SHA-256 скачанного архива записываются в набор и
+видны в окне обновления и в «Наборах правил и лицензиях». «Вернуть встроенные правила» удаляет
+скачанный набор. Если скачанный набор повреждён, используются встроенные правила.
+
+Из командной строки тот же набор собирается командой
+`evtxdump pack-rules <sigma_all_rules.zip> <тег релиза> <hayabusa-rules.zip> <коммит> <rules.json>`.
 
 ### Своя папка правил
 
@@ -65,7 +88,25 @@ nav_order: 8
 `ParentImage` → `ParentProcessName`, `IntegrityLevel` → `MandatoryLabel` (уровни целостности
 переводятся в SID `S-1-16-…`).
 
-Правила с `product`, отличным от `windows`, не поддерживаются.
+### Linux (сбор UAC)
+
+| logsource | События Linux-кейса |
+|---|---|
+| `category: process_creation` | запуски программ из auditd (`Action = process_exec`) |
+| `service: auditd` | события `audit/audit.log` |
+| `service: auth` | `auth.log`, `secure` и записи journald с facility auth/authpriv |
+| `service: syslog` | `syslog`, `messages` |
+| `service: sshd`, `sudo`, `cron`, `clamav`, `vsftpd`, `guacamole` | записи этой программы в любом журнале |
+| только `product: linux` | все события кейса |
+
+Поля переименовываются там, где смысл совпадает: в запусках процессов `Image` → `exe`,
+`CurrentDirectory` → `cwd`, `User` → `UidName`, `LogonId` → `ses`; в auditd `type` → `Type`,
+`SYSCALL` → `SyscallName`; в sudo `USER` → `TargetUserName`. `ParentImage` и `ParentCommandLine`
+в записях auditd нет — правила с ними показывают эти поля как отсутствующие. Категории
+`file_event`, `network_connection` и другие события Sysmon for Linux в сборе UAC не встречаются —
+такие правила отмечены «не поддерживается» с этой причиной.
+
+Правила с `product`, отличным от `windows` и `linux`, не поддерживаются.
 
 ### Поля
 

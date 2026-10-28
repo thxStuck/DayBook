@@ -5,7 +5,7 @@
 <meta name="robots" content="anchors">
 <meta name="color-scheme" content="light dark">
 <meta name="description" content="Sigma — открытый формат правил обнаружения. Приложение переводит каждое правило в запрос DQL, выполняет его по кейсу и сохраняет результат. Перевод виден в карточке правила, его можно скопировать и выполнить вручную.">
-<meta name="keywords" content="Что это, Правила в поставке, Своя папка правил, Запуск, Как правило переводится в запрос, logsource, Поля, Модификаторы, condition, Если правило не выполнено, Лимит регулярных выражений, Экран «Детекты», Где ещё видны срабатывания, Проверка движка">
+<meta name="keywords" content="Что это, Правила в поставке, Обновление правил, Своя папка правил, Запуск, Как правило переводится в запрос, logsource, Linux (сбор UAC), Поля, Модификаторы, condition, Если правило не выполнено, Лимит регулярных выражений, Экран «Детекты», Где ещё видны срабатывания, Проверка движка">
 
 <title>Sigma-детекты — Справка DayBookEvtxMacOS</title>
 <link rel="stylesheet" href="../shared/style.css">
@@ -14,21 +14,32 @@
 <header class="top"><a href="index.html">Содержание</a><a class="external" href="https://thxstuck.github.io/DayBook/ru/">Документация на сайте</a></header>
 <main>
 <h1 id="sigma-детекты"><a name="sigma-детекты"></a>Sigma-детекты</h1>
-<nav class="toc"><ul><li><a href="#что-это">Что это</a></li><li><a href="#правила-в-поставке">Правила в поставке</a></li><li class="sub"><a href="#своя-папка-правил">Своя папка правил</a></li><li><a href="#запуск">Запуск</a></li><li><a href="#как-правило-переводится-в-запрос">Как правило переводится в запрос</a></li><li class="sub"><a href="#logsource">logsource</a></li><li class="sub"><a href="#поля">Поля</a></li><li class="sub"><a href="#модификаторы">Модификаторы</a></li><li class="sub"><a href="#condition">condition</a></li><li class="sub"><a href="#если-правило-не-выполнено">Если правило не выполнено</a></li><li class="sub"><a href="#лимит-регулярных-выражений">Лимит регулярных выражений</a></li><li><a href="#экран-детекты">Экран «Детекты»</a></li><li><a href="#где-ещё-видны-срабатывания">Где ещё видны срабатывания</a></li><li><a href="#проверка-движка">Проверка движка</a></li></ul></nav>
+<nav class="toc"><ul><li><a href="#что-это">Что это</a></li><li><a href="#правила-в-поставке">Правила в поставке</a></li><li class="sub"><a href="#обновление-правил">Обновление правил</a></li><li class="sub"><a href="#своя-папка-правил">Своя папка правил</a></li><li><a href="#запуск">Запуск</a></li><li><a href="#как-правило-переводится-в-запрос">Как правило переводится в запрос</a></li><li class="sub"><a href="#logsource">logsource</a></li><li class="sub"><a href="#linux-сбор-uac">Linux (сбор UAC)</a></li><li class="sub"><a href="#поля">Поля</a></li><li class="sub"><a href="#модификаторы">Модификаторы</a></li><li class="sub"><a href="#condition">condition</a></li><li class="sub"><a href="#если-правило-не-выполнено">Если правило не выполнено</a></li><li class="sub"><a href="#лимит-регулярных-выражений">Лимит регулярных выражений</a></li><li><a href="#экран-детекты">Экран «Детекты»</a></li><li><a href="#где-ещё-видны-срабатывания">Где ещё видны срабатывания</a></li><li><a href="#проверка-движка">Проверка движка</a></li></ul></nav>
 <h2 id="что-это"><a name="что-это"></a>Что это</h2>
 <p><a href="https://sigmahq.io" class="external">Sigma</a> — открытый формат правил обнаружения. Приложение переводит каждое правило в запрос <a href="dql.html">DQL</a>, выполняет его по кейсу и сохраняет результат. Перевод виден в карточке правила, его можно скопировать и выполнить вручную.</p>
 <h2 id="правила-в-поставке"><a name="правила-в-поставке"></a>Правила в поставке</h2>
 <table>
 <thead><tr><th>Набор</th><th>Правил</th><th>Версия</th><th>Лицензия</th></tr></thead>
 <tbody>
-<tr><td><a href="https://github.com/SigmaHQ/sigma" class="external">SigmaHQ</a></td><td>2554</td><td>Release 2026-07-09, r2026-04-01-50-g552f3fee4</td><td>Detection Rule License 1.1</td></tr>
-<tr><td><a href="https://github.com/Yamato-Security/hayabusa-rules" class="external">Hayabusa rules</a></td><td>194</td><td>ветка main</td><td>Detection Rule License 1.1</td></tr>
+<tr><td><a href="https://github.com/SigmaHQ/sigma" class="external">SigmaHQ</a></td><td>2554 для Windows, 183 для Linux</td><td>релиз r2026-07-01 от 2026-07-09</td><td>Detection Rule License 1.1</td></tr>
+<tr><td><a href="https://github.com/Yamato-Security/hayabusa-rules" class="external">Hayabusa rules</a></td><td>196 (Windows)</td><td>коммит 97b3fd9 от 2026-10-28</td><td>Detection Rule License 1.1</td></tr>
 </tbody></table>
 <ul>
-<li>Из SigmaHQ взяты правила <code>rules/windows/**</code>, а также правила с <code>product: windows</code> из <code>rules/</code> и <code>rules-emerging-threats/</code>. Из Hayabusa — <code>hayabusa/**</code> (их копии правил SigmaHQ из папки <code>sigma/</code> не берутся).</li>
-<li>Вместе с правилами Hayabusa поставляются 248 псевдонимов полей Hayabusa.</li>
+<li>Из SigmaHQ взяты правила <code>rules/windows/**</code> и <code>rules/linux/**</code>, а также правила с <code>product: windows</code> или <code>product: linux</code> из <code>rules/</code> и <code>rules-emerging-threats/</code>. Из Hayabusa — <code>hayabusa/**</code> (их копии правил SigmaHQ из папки <code>sigma/</code> не берутся).</li>
+<li>Вместе с правилами Hayabusa поставляются псевдонимы полей Hayabusa (<code>config/eventkey_alias.txt</code>).</li>
+<li>К кейсу применяются правила его системы: к Windows-кейсу — правила Windows и Hayabusa, к Linux-кейсу — правила Linux. Сколько правил другой системы пропущено, видно в сведениях о прогоне.</li>
 <li>Автор каждого правила показывается рядом с каждым срабатыванием. Наборы, версии и полный текст DRL 1.1 — в меню «Правила» → «Наборы правил и лицензии…».</li>
 </ul>
+<h3 id="обновление-правил"><a name="обновление-правил"></a>Обновление правил</h3>
+<p>Кнопка <strong>«Обновить Sigma-правила»</strong> на экране «Детекты»:</p>
+<ol>
+<li>Приложение сверяет установленный набор с последним релизом SigmaHQ и последним коммитом правил Hayabusa на GitHub и показывает обе версии.</li>
+<li>Если на GitHub новее — показывает, что будет скачано (архив <code>sigma_all_rules.zip</code> из релиза SigmaHQ и архив правил Hayabusa этого коммита, с размером), и по кнопке «Скачать и установить» скачивает их.</li>
+<li>SHA-256 архива SigmaHQ сверяется с опубликованным GitHub; затем собирается новый набор правил, проверяется (правила должны загрузиться, их число — правдоподобным) и только после этого устанавливается в <code>~/Library/Application Support/&lt;приложение&gt;/Rules/rules.json</code>.</li>
+<li>«Запустить детекты заново» — прогон по новым правилам.</li>
+</ol>
+<p>Версия каждого набора, дата релиза или коммита и SHA-256 скачанного архива записываются в набор и видны в окне обновления и в «Наборах правил и лицензиях». «Вернуть встроенные правила» удаляет скачанный набор. Если скачанный набор повреждён, используются встроенные правила.</p>
+<p>Из командной строки тот же набор собирается командой <code>evtxdump pack-rules &lt;sigma_all_rules.zip&gt; &lt;тег релиза&gt; &lt;hayabusa-rules.zip&gt; &lt;коммит&gt; &lt;rules.json&gt;</code>.</p>
 <h3 id="своя-папка-правил"><a name="своя-папка-правил"></a>Своя папка правил</h3>
 <ul>
 <li>Меню «Правила» → «Выбрать папку своих правил…». Читаются все файлы <code>.yml</code> и <code>.yaml</code>, включая вложенные папки.</li>
@@ -54,7 +65,19 @@
 <tr><td>только <code>product: windows</code></td><td>все журналы; каналы и EventID задаёт само правило</td></tr>
 </tbody></table>
 <p>Для варианта Security 4688 поля переименовываются: <code>Image</code> → <code>NewProcessName</code>, <code>ParentImage</code> → <code>ParentProcessName</code>, <code>IntegrityLevel</code> → <code>MandatoryLabel</code> (уровни целостности переводятся в SID <code>S-1-16-…</code>).</p>
-<p>Правила с <code>product</code>, отличным от <code>windows</code>, не поддерживаются.</p>
+<h3 id="linux-сбор-uac"><a name="linux-сбор-uac"></a>Linux (сбор UAC)</h3>
+<table>
+<thead><tr><th>logsource</th><th>События Linux-кейса</th></tr></thead>
+<tbody>
+<tr><td><code>category: process_creation</code></td><td>запуски программ из auditd (<code>Action = process_exec</code>)</td></tr>
+<tr><td><code>service: auditd</code></td><td>события <code>audit/audit.log</code></td></tr>
+<tr><td><code>service: auth</code></td><td><code>auth.log</code>, <code>secure</code> и записи journald с facility auth/authpriv</td></tr>
+<tr><td><code>service: syslog</code></td><td><code>syslog</code>, <code>messages</code></td></tr>
+<tr><td><code>service: sshd</code>, <code>sudo</code>, <code>cron</code>, <code>clamav</code>, <code>vsftpd</code>, <code>guacamole</code></td><td>записи этой программы в любом журнале</td></tr>
+<tr><td>только <code>product: linux</code></td><td>все события кейса</td></tr>
+</tbody></table>
+<p>Поля переименовываются там, где смысл совпадает: в запусках процессов <code>Image</code> → <code>exe</code>, <code>CurrentDirectory</code> → <code>cwd</code>, <code>User</code> → <code>UidName</code>, <code>LogonId</code> → <code>ses</code>; в auditd <code>type</code> → <code>Type</code>, <code>SYSCALL</code> → <code>SyscallName</code>; в sudo <code>USER</code> → <code>TargetUserName</code>. <code>ParentImage</code> и <code>ParentCommandLine</code> в записях auditd нет — правила с ними показывают эти поля как отсутствующие. Категории <code>file_event</code>, <code>network_connection</code> и другие события Sysmon for Linux в сборе UAC не встречаются — такие правила отмечены «не поддерживается» с этой причиной.</p>
+<p>Правила с <code>product</code>, отличным от <code>windows</code> и <code>linux</code>, не поддерживаются.</p>
 <h3 id="поля"><a name="поля"></a>Поля</h3>
 <ul>
 <li><code>EventID</code>, <code>Channel</code>, <code>Provider_Name</code>, <code>Computer</code>, <code>Level</code>, <code>Keywords</code> и т. п. — системные поля.</li>

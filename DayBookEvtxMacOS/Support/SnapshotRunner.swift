@@ -133,6 +133,40 @@ enum SnapshotRunner {
                 }
                 snap(dir, step)
             }
+            // `-snapshotRules [install]`: "Update Sigma rules" against GitHub, then detections with the pack in use.
+            if let r = ProcessInfo.processInfo.arguments.firstIndex(of: "-snapshotRules") {
+                let args = ProcessInfo.processInfo.arguments
+                try? FileManager.default.removeItem(at: RuleLibrary.installedPackURL.deletingLastPathComponent())
+                let updater = RuleUpdater.shared
+                updater.check()
+                for _ in 0..<240 where updater.state == .checking { await pause(0.25) }
+                if let p = updater.plan {
+                    log("== R1-check: SigmaHQ \(p.sigma.tag) \(p.sigma.published) size=\(p.sigma.size) digest=\(p.sigma.digest ?? "-") newer=\(p.sigmaNewer) · Hayabusa \(p.hayabusa.sha.prefix(7)) \(p.hayabusa.date) newer=\(p.hayabusaNewer)")
+                } else {
+                    log("== R1-check: \(updater.state)")
+                }
+                snapView(dir, "R1-update", RuleUpdateView(model: model, close: {}), size: CGSize(width: 620, height: 420))
+                if r + 1 < args.count, args[r + 1] == "install" {
+                    updater.install()
+                    await pause(1.0)
+                    for _ in 0..<1200 where updater.busy { await pause(0.25) }
+                    log("== R2-install: \(updater.state) installed=\(RuleLibrary.hasInstalledPack) at \(RuleLibrary.installedPackURL.path)")
+                    snapView(dir, "R2-installed", RuleUpdateView(model: model, close: {}), size: CGSize(width: 620, height: 420))
+                }
+                model.mode = .detections
+                model.runDetections()
+                for _ in 0..<2400 where model.detectionProgress != nil { await pause(0.25) }
+                let m = model.detectionMeta
+                log("== R3-detections: total=\(m["rules_total"] ?? "?") evaluated=\(m["evaluated"] ?? "?") unsupported=\(m["unsupported"] ?? "?") failed=\(m["failed"] ?? "?") hits=\(m["with_hits"] ?? "?") otherPlatform=\(m["other_platform"] ?? "?") error=\(model.detectionError ?? "-")")
+                log("   pack: \(DetectionsView.packLabel)")
+                await pause(1.0)
+                snap(dir, "R3-detections")
+                try? FileManager.default.removeItem(at: RuleLibrary.installedPackURL.deletingLastPathComponent())
+                log("== done")
+                try? report.write(to: dir.appendingPathComponent("report.txt"), atomically: true, encoding: .utf8)
+                NSApp.terminate(nil)
+                return
+            }
             if model.isLinux {
                 await linuxScenario(model, dir: dir, log: log, settle: settle, pause: pause)
                 try? report.write(to: dir.appendingPathComponent("report.txt"), atomically: true, encoding: .utf8)

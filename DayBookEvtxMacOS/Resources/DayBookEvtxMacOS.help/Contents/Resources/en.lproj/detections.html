@@ -5,7 +5,7 @@
 <meta name="robots" content="anchors">
 <meta name="color-scheme" content="light dark">
 <meta name="description" content="Sigma is an open format for detection rules. The app turns every rule into a DQL query, runs it against the case and stores the result. The translation is visible in the rule card; you can copy it and run it by hand.">
-<meta name="keywords" content="What it is, Bundled rules, Your own rules folder, Running, How a rule becomes a query, logsource, Fields, Modifiers, condition, When a rule did not run, Regular expression limit, The Detections screen, Where else matches show up, Engine check">
+<meta name="keywords" content="What it is, Bundled rules, Updating the rules, Your own rules folder, Running, How a rule becomes a query, logsource, Linux (UAC collections), Fields, Modifiers, condition, When a rule did not run, Regular expression limit, The Detections screen, Where else matches show up, Engine check">
 
 <title>Sigma detections — DayBookEvtxMacOS Help</title>
 <link rel="stylesheet" href="../shared/style.css">
@@ -14,21 +14,32 @@
 <header class="top"><a href="index.html">Contents</a><a class="external" href="https://thxstuck.github.io/DayBook/en/">Documentation online</a></header>
 <main>
 <h1 id="sigma-detections"><a name="sigma-detections"></a>Sigma detections</h1>
-<nav class="toc"><ul><li><a href="#what-it-is">What it is</a></li><li><a href="#bundled-rules">Bundled rules</a></li><li class="sub"><a href="#your-own-rules-folder">Your own rules folder</a></li><li><a href="#running">Running</a></li><li><a href="#how-a-rule-becomes-a-query">How a rule becomes a query</a></li><li class="sub"><a href="#logsource">logsource</a></li><li class="sub"><a href="#fields">Fields</a></li><li class="sub"><a href="#modifiers">Modifiers</a></li><li class="sub"><a href="#condition">condition</a></li><li class="sub"><a href="#when-a-rule-did-not-run">When a rule did not run</a></li><li class="sub"><a href="#regular-expression-limit">Regular expression limit</a></li><li><a href="#the-detections-screen">The Detections screen</a></li><li><a href="#where-else-matches-show-up">Where else matches show up</a></li><li><a href="#engine-check">Engine check</a></li></ul></nav>
+<nav class="toc"><ul><li><a href="#what-it-is">What it is</a></li><li><a href="#bundled-rules">Bundled rules</a></li><li class="sub"><a href="#updating-the-rules">Updating the rules</a></li><li class="sub"><a href="#your-own-rules-folder">Your own rules folder</a></li><li><a href="#running">Running</a></li><li><a href="#how-a-rule-becomes-a-query">How a rule becomes a query</a></li><li class="sub"><a href="#logsource">logsource</a></li><li class="sub"><a href="#linux-uac-collections">Linux (UAC collections)</a></li><li class="sub"><a href="#fields">Fields</a></li><li class="sub"><a href="#modifiers">Modifiers</a></li><li class="sub"><a href="#condition">condition</a></li><li class="sub"><a href="#when-a-rule-did-not-run">When a rule did not run</a></li><li class="sub"><a href="#regular-expression-limit">Regular expression limit</a></li><li><a href="#the-detections-screen">The Detections screen</a></li><li><a href="#where-else-matches-show-up">Where else matches show up</a></li><li><a href="#engine-check">Engine check</a></li></ul></nav>
 <h2 id="what-it-is"><a name="what-it-is"></a>What it is</h2>
 <p><a href="https://sigmahq.io" class="external">Sigma</a> is an open format for detection rules. The app turns every rule into a <a href="dql.html">DQL</a> query, runs it against the case and stores the result. The translation is visible in the rule card; you can copy it and run it by hand.</p>
 <h2 id="bundled-rules"><a name="bundled-rules"></a>Bundled rules</h2>
 <table>
 <thead><tr><th>Set</th><th>Rules</th><th>Version</th><th>Licence</th></tr></thead>
 <tbody>
-<tr><td><a href="https://github.com/SigmaHQ/sigma" class="external">SigmaHQ</a></td><td>2,554</td><td>Release 2026-07-09, r2026-04-01-50-g552f3fee4</td><td>Detection Rule License 1.1</td></tr>
-<tr><td><a href="https://github.com/Yamato-Security/hayabusa-rules" class="external">Hayabusa rules</a></td><td>194</td><td>main branch</td><td>Detection Rule License 1.1</td></tr>
+<tr><td><a href="https://github.com/SigmaHQ/sigma" class="external">SigmaHQ</a></td><td>2,554 for Windows, 183 for Linux</td><td>release r2026-07-01 of 2026-07-09</td><td>Detection Rule License 1.1</td></tr>
+<tr><td><a href="https://github.com/Yamato-Security/hayabusa-rules" class="external">Hayabusa rules</a></td><td>196 (Windows)</td><td>commit 97b3fd9 of 2026-10-28</td><td>Detection Rule License 1.1</td></tr>
 </tbody></table>
 <ul>
-<li>From SigmaHQ: <code>rules/windows/**</code> plus rules with <code>product: windows</code> from <code>rules/</code> and <code>rules-emerging-threats/</code>. From Hayabusa: <code>hayabusa/**</code> (its copies of SigmaHQ rules in <code>sigma/</code> are not taken).</li>
-<li>The 248 Hayabusa field aliases ship with the Hayabusa rules.</li>
+<li>From SigmaHQ: <code>rules/windows/**</code> and <code>rules/linux/**</code> plus rules with <code>product: windows</code> or <code>product: linux</code> from <code>rules/</code> and <code>rules-emerging-threats/</code>. From Hayabusa: <code>hayabusa/**</code> (its copies of SigmaHQ rules in <code>sigma/</code> are not taken).</li>
+<li>Hayabusa's field aliases (<code>config/eventkey_alias.txt</code>) ship with the Hayabusa rules.</li>
+<li>A case gets the rules of its system: a Windows case the Windows and Hayabusa rules, a Linux case the Linux rules. The run's details show how many rules of the other system were skipped.</li>
 <li>The author of every rule is shown next to each match. The sets, versions and the full DRL 1.1 text are under Rules → Rule sets and licenses….</li>
 </ul>
+<h3 id="updating-the-rules"><a name="updating-the-rules"></a>Updating the rules</h3>
+<p>The <strong>Update Sigma Rules</strong> button on the Detections screen:</p>
+<ol>
+<li>The app compares the installed set with the latest SigmaHQ release and the latest commit of the Hayabusa rules on GitHub and shows both versions.</li>
+<li>When GitHub has something newer, it shows what will be downloaded (the <code>sigma_all_rules.zip</code> archive of the SigmaHQ release and the Hayabusa rules archive of that commit, with sizes) and downloads them on Download and Install.</li>
+<li>The SHA-256 of the SigmaHQ archive is checked against the one GitHub publishes; a new rule set is built, checked (the rules must load and their number must be plausible) and only then installed in <code>~/Library/Application Support/&lt;app&gt;/Rules/rules.json</code>.</li>
+<li>Run Detections Again runs the new rules.</li>
+</ol>
+<p>The version of each set, the release or commit date and the SHA-256 of the downloaded archive are recorded in the set and shown in the update sheet and in Rule sets and licenses. Use Bundled Rules removes the downloaded set. A damaged downloaded set falls back to the bundled rules.</p>
+<p>From the command line the same set is built with <code>evtxdump pack-rules &lt;sigma_all_rules.zip&gt; &lt;release tag&gt; &lt;hayabusa-rules.zip&gt; &lt;commit&gt; &lt;rules.json&gt;</code>.</p>
 <h3 id="your-own-rules-folder"><a name="your-own-rules-folder"></a>Your own rules folder</h3>
 <ul>
 <li>Rules → Choose custom rules folder…. Every <code>.yml</code> and <code>.yaml</code> file is read, including subfolders.</li>
@@ -54,7 +65,19 @@
 <tr><td>only <code>product: windows</code></td><td>all logs; the rule sets the channels and EventIDs itself</td></tr>
 </tbody></table>
 <p>For the Security 4688 variant fields are renamed: <code>Image</code> → <code>NewProcessName</code>, <code>ParentImage</code> → <code>ParentProcessName</code>, <code>IntegrityLevel</code> → <code>MandatoryLabel</code> (integrity levels become <code>S-1-16-…</code> SIDs).</p>
-<p>Rules with a <code>product</code> other than <code>windows</code> are not supported.</p>
+<h3 id="linux-uac-collections"><a name="linux-uac-collections"></a>Linux (UAC collections)</h3>
+<table>
+<thead><tr><th>logsource</th><th>Events of a Linux case</th></tr></thead>
+<tbody>
+<tr><td><code>category: process_creation</code></td><td>program launches from auditd (<code>Action = process_exec</code>)</td></tr>
+<tr><td><code>service: auditd</code></td><td>events of <code>audit/audit.log</code></td></tr>
+<tr><td><code>service: auth</code></td><td><code>auth.log</code>, <code>secure</code> and journald entries of the auth/authpriv facility</td></tr>
+<tr><td><code>service: syslog</code></td><td><code>syslog</code>, <code>messages</code></td></tr>
+<tr><td><code>service: sshd</code>, <code>sudo</code>, <code>cron</code>, <code>clamav</code>, <code>vsftpd</code>, <code>guacamole</code></td><td>entries of that program in any log</td></tr>
+<tr><td>only <code>product: linux</code></td><td>every event of the case</td></tr>
+</tbody></table>
+<p>Fields are renamed where the meaning is the same: for process launches <code>Image</code> → <code>exe</code>, <code>CurrentDirectory</code> → <code>cwd</code>, <code>User</code> → <code>UidName</code>, <code>LogonId</code> → <code>ses</code>; for auditd <code>type</code> → <code>Type</code>, <code>SYSCALL</code> → <code>SyscallName</code>; for sudo <code>USER</code> → <code>TargetUserName</code>. auditd records have no <code>ParentImage</code> or <code>ParentCommandLine</code> — rules that use them show these fields as absent. The <code>file_event</code>, <code>network_connection</code> and other Sysmon for Linux categories do not occur in a UAC collection — such rules are marked not supported with that reason.</p>
+<p>Rules with a <code>product</code> other than <code>windows</code> and <code>linux</code> are not supported.</p>
 <h3 id="fields"><a name="fields"></a>Fields</h3>
 <ul>
 <li><code>EventID</code>, <code>Channel</code>, <code>Provider_Name</code>, <code>Computer</code>, <code>Level</code>, <code>Keywords</code> and the like are system fields.</li>

@@ -122,6 +122,8 @@ Linux user names are case-sensitive: `Root` tried by a scanner is not `root`.
   PAM, audit rules). Files are read from the collection folder on demand.
 - **Hosts, Users, IP addresses** — the entity registry.
 - **Sessions** — wtmp logins: login → logout on the same terminal or a reboot, as `last` reads them.
+- **Detections** — SigmaHQ's Linux rules (auditd, auth, sshd, sudo, cron, process launches); the
+  field mapping is described on [Sigma detections](detections.html).
 - **Processes** — program launches from auditd. auditd writes only the PPID, so parent → child links
   are reconstructed heuristically and marked 🔗.
 - In the event details the **Record** tab shows the original lines (all lines of an audit event or an
@@ -131,7 +133,6 @@ Linux user names are case-sensitive: `Root` tried by a scanner is not `root`.
 ## Limits
 
 - The collection must be extracted: `.tar.gz` and `.zip` archives are not opened.
-- Sigma detections for Linux are not bundled yet: the Detections section is hidden in Linux cases.
 - Binary logs (`mysql-bin.*`, `faillog`, `tallylog`) are only listed as sources.
 - The records of one audit event are merged when they follow each other; records of different events
   mixed together give several events with the same `AuditId`.

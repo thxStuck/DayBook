@@ -400,7 +400,7 @@ func sigma(_ args: [String]) {
                      set.aliases.count, Date().timeIntervalSince(t0)))
         for f in set.failures { print("  not loaded: \(f.source) \(f.path): \(f.message)") }
         let store = try CaseStore(url: URL(fileURLWithPath: path))
-        let catalog = SigmaFieldCatalog(has: { store.exactKeyId($0) != nil }, aliases: set.aliases)
+        let catalog = SigmaFieldCatalog(has: { store.exactKeyId($0) != nil }, aliases: set.aliases, platform: store.platform)
         if let needle = opt("--rule") {
             for r in set.rules where r.id == needle || r.path.contains(needle) {
                 let c = SigmaCompiler.compile(r, catalog: catalog)
@@ -482,7 +482,36 @@ final class Locked<T>: @unchecked Sendable {
     func swap(_ v: T) -> T { lock.lock(); defer { lock.unlock() }; let old = value; value = v; return old }
 }
 
+/// evtxdump pack-rules <sigma_all_rules.zip> <tag> [hayabusa.zip <commit>] <out.json> [--sigma-published T] [--hayabusa-published T]
+func packRules(_ all: [String]) {
+    var args = all
+    func option(_ name: String) -> String? {
+        guard let i = args.firstIndex(of: name), i + 1 < args.count else { return nil }
+        defer { args.removeSubrange(i...(i + 1)) }
+        return args[i + 1]
+    }
+    let sigmaPublished = option("--sigma-published"), hayabusaPublished = option("--hayabusa-published")
+    guard args.count == 3 || args.count == 5 else {
+        fail("usage: evtxdump pack-rules <sigma_all_rules.zip> <release tag> [<hayabusa-rules.zip> <commit>] <out.json>")
+    }
+    do {
+        let sigma = SigmaPackBuilder.Archive(data: try Data(contentsOf: URL(fileURLWithPath: args[0])), version: args[1],
+                                             published: sigmaPublished, url: "https://github.com/SigmaHQ/sigma/releases/download/\(args[1])/sigma_all_rules.zip")
+        let hayabusa = args.count == 5 ? SigmaPackBuilder.Archive(data: try Data(contentsOf: URL(fileURLWithPath: args[2])),
+                                                                  version: args[3], published: hayabusaPublished,
+                                                                  url: "https://codeload.github.com/Yamato-Security/hayabusa-rules/zip/\(args[3])") : nil
+        let t0 = Date()
+        let (json, s) = try SigmaPackBuilder.build(sigma: sigma, hayabusa: hayabusa)
+        try json.write(to: URL(fileURLWithPath: args.last!))
+        print(String(format: "%.0f ms: SigmaHQ %@ windows=%d linux=%d · Hayabusa %@ %d · aliases %d · %.1f MB", Date().timeIntervalSince(t0) * 1000,
+                     s.sigmaVersion, s.sigmaWindows, s.sigmaLinux, s.hayabusaVersion, s.hayabusa, s.aliases, Double(json.count) / 1e6))
+    } catch {
+        fail("pack-rules failed: \(error)")
+    }
+}
+
 switch cmd {
+case "pack-rules": packRules(args)
 case "ingest": ingest(args)
 case "query": query(args)
 case "dql": dql(args)

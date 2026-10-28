@@ -63,10 +63,10 @@ final class CaseModel {
     let url: URL
     var title: String { url.deletingPathExtension().lastPathComponent }
     var isLinux: Bool { store.platform == .linux }
-    /// Sections of the main window. Linux cases have no Windows-only analyses (logon sessions,
-    /// process trees and Sigma rules are built from Windows events).
+    /// Sections of the main window; Linux cases add "System" (the collection's own data).
     var modes: [MainMode] {
-        isLinux ? [.events, .timeline, .logs, .system, .hosts, .users, .ips, .sessions, .processes] : MainMode.allCases.filter { $0 != .system }
+        isLinux ? [.events, .timeline, .logs, .system, .detections, .hosts, .users, .ips, .sessions, .processes]
+            : MainMode.allCases.filter { $0 != .system }
     }
 
     // Inputs

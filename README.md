@@ -31,8 +31,10 @@ users, logon sessions, process trees and Sigma detections. Linux systems are cov
 - **Logs** — one log at a time, like Windows Event Viewer.
 - **Registry of hosts, users and IPs** with links, **logon and RDP sessions**, **process trees**
   (Sysmon by ProcessGuid, Security 4688 by PID — the heuristic is marked).
-- **Sigma detections**: 2,748 bundled SigmaHQ and Hayabusa rules plus your own rules folder. Every rule
-  becomes DQL you can see and run by hand; unsupported rules are listed with the reason.
+- **Sigma detections**: 2,933 bundled SigmaHQ and Hayabusa rules for Windows and Linux plus your own rules
+  folder; **Update Sigma Rules** checks GitHub for a newer SigmaHQ release and Hayabusa commit, downloads
+  them (SHA-256 checked) and installs the new set. Every rule becomes DQL you can see and run by hand;
+  unsupported rules are listed with the reason.
 - **Export** to CSV, CSV for Excel (formula-safe), JSON Lines and XLSX — time in the chosen zone and
   UTC, source file, RecordID and the file's SHA-256.
 - **Transparency**: heuristics, skips, limits and recovered data are always marked.

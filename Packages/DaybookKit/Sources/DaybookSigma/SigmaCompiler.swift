@@ -22,10 +22,13 @@ public struct SigmaFieldCatalog {
     public let has: (String) -> Bool
     /// Hayabusa field aliases (alias → XML path).
     public let aliases: [String: String]
+    /// The system the case comes from: Windows rules run on .evtx cases, Linux rules on UAC cases.
+    public let platform: CasePlatform
 
-    public init(has: @escaping (String) -> Bool, aliases: [String: String]) {
+    public init(has: @escaping (String) -> Bool, aliases: [String: String], platform: CasePlatform = .windows) {
         self.has = has
         self.aliases = aliases
+        self.platform = platform
     }
 }
 
@@ -162,8 +165,68 @@ public enum SigmaCompiler {
         "iis-configuration": ["Microsoft-IIS-Configuration/Operational"],
     ]
 
-    static func variants(_ ls: [String: String]) throws -> [Variant] {
-        if let product = ls["product"]?.lowercased(), product != "windows" {
+    // MARK: Linux (UAC cases)
+
+    static func providers(_ ps: [String]) -> DQLExpr {
+        ps.count == 1 ? .compare(field: CaseSchema.SystemKey.provider, op: .eq, value: ps[0])
+            : .inList(field: CaseSchema.SystemKey.provider, values: ps)
+    }
+
+    /// Linux services → the events of a UAC case that carry them.
+    static func linuxServices(_ catalog: SigmaFieldCatalog) -> [String: Variant] {
+        var auth: [DQLExpr] = [channels(["auth.log", "secure"])]
+        if catalog.has("SYSLOG_FACILITY") {   // journald entries of the auth / authpriv facilities
+            auth.append(.inList(field: "SYSLOG_FACILITY", values: ["4", "10"]))
+        }
+        return [
+            "auditd": Variant(label: "auditd (audit/audit.log)", base: channel("audit/audit.log"),
+                              renames: ["type": "Type", "SYSCALL": "SyscallName"]),
+            "auth": Variant(label: "auth.log | secure", base: auth.count == 1 ? auth[0] : .or(auth)),
+            "syslog": Variant(label: "syslog | messages", base: channels(["syslog", "messages"])),
+            "sshd": Variant(label: "sshd", base: providers(["sshd", "sshd-session", "sshd-auth"])),
+            "sudo": Variant(label: "sudo", base: providers(["sudo"]), renames: ["USER": "TargetUserName"]),
+            "cron": Variant(label: "cron", base: providers(["CRON", "cron", "crond"])),
+            "clamav": Variant(label: "clamav", base: providers(["clamd", "freshclam", "clamav"])),
+            "vsftpd": Variant(label: "vsftpd", base: providers(["vsftpd"])),
+            "guacamole": Variant(label: "guacamole", base: providers(["guacd"])),
+        ]
+    }
+
+    /// Linux categories: process creation comes from auditd's execve records. Fields keep their
+    /// meaning where renamed; ParentImage / ParentCommandLine are not in auditd records.
+    static let linuxCategories: [String: Variant] = [
+        "process_creation": Variant(label: "auditd execve", base: .compare(field: "Action", op: .eq, value: "process_exec"),
+                                    renames: ["Image": "exe", "CurrentDirectory": "cwd", "User": "UidName", "LogonId": "ses",
+                                              "ProcessId": "pid", "ParentProcessId": "ppid"]),
+    ]
+
+    static func linuxVariants(_ ls: [String: String], _ catalog: SigmaFieldCatalog) throws -> [Variant] {
+        var v: Variant?
+        if let category = ls["category"]?.lowercased() {
+            guard let c = linuxCategories[category] else {
+                throw SigmaUnsupported(reason: String(localized: "категория logsource «\(category)»: в сборе UAC нет таких событий (их пишет Sysmon for Linux)"))
+            }
+            v = c
+        }
+        if let service = ls["service"]?.lowercased() {
+            guard let s = linuxServices(catalog)[service] else {
+                throw SigmaUnsupported(reason: String(localized: "сервис logsource «\(service)» не сопоставлен журналам сбора UAC"))
+            }
+            v = v.map { Variant(label: $0.label + " · " + s.label, base: .and([$0.base, s.base]),
+                                renames: $0.renames.merging(s.renames) { a, _ in a }, values: $0.values) } ?? s
+        }
+        return [v ?? Variant(label: String(localized: "все журналы Linux"), base: .constant(true))]
+    }
+
+    static func variants(_ ls: [String: String], _ catalog: SigmaFieldCatalog) throws -> [Variant] {
+        let product = ls["product"]?.lowercased()
+        if catalog.platform == .linux {
+            guard product == "linux" else {
+                throw SigmaUnsupported(reason: String(localized: "правило для «\(product ?? "windows")», кейс — Linux"))
+            }
+            return try linuxVariants(ls, catalog)
+        }
+        if let product, product != "windows" {
             throw SigmaUnsupported(reason: String(localized: "logsource product «\(product)» — не журналы Windows"))
         }
         if let category = ls["category"]?.lowercased() {
@@ -274,7 +337,7 @@ public enum SigmaCompiler {
 
     public static func compile(_ rule: SigmaRule, catalog: SigmaFieldCatalog) -> CompiledSigmaRule {
         do {
-            let vs = try variants(rule.logsource)
+            let vs = try variants(rule.logsource, catalog)
             if rule.conditions.isEmpty { throw SigmaUnsupported(reason: String(localized: "нет condition")) }
             var parts: [DQLExpr] = []
             var labels: [String] = []

@@ -21,8 +21,21 @@ public enum SigmaRunner {
                            progress: @Sendable (Int, Int) -> Void = { _, _ in },
                            isCancelled: @escaping @Sendable () -> Bool = { false }) throws -> Summary {
         let t0 = Date()
-        let catalog = SigmaFieldCatalog(has: { store.exactKeyId($0) != nil }, aliases: set.aliases)
+        let catalog = SigmaFieldCatalog(has: { store.exactKeyId($0) != nil }, aliases: set.aliases, platform: store.platform)
         let engine = DQLEngine(store: store, parseTime: { _ in nil })
+        // Rules of the other system are not evaluated (counted in the run's metadata); rules
+        // without a product (own rules) are compiled and report their own reason.
+        var set = set
+        let allRules = set.rules
+        set.rules = allRules.filter { $0.platform == nil || $0.platform == store.platform }
+        // Rules that failed to load are listed for their own system only (by folder / source).
+        let failures = set.failures
+        set.failures = failures.filter { f in
+            let windows = f.source == "Hayabusa" || f.path.hasPrefix("rules/windows/")
+            let linux = f.path.hasPrefix("rules/linux/")
+            return store.platform == .linux ? !windows : !linux
+        }
+        let otherPlatform = allRules.count - set.rules.count + failures.count - set.failures.count
         engine.isCancelled = isCancelled
 
         var hostPostings: [[UInt32]] = []
@@ -123,6 +136,7 @@ public enum SigmaRunner {
             "errors": String(summary.errors), "with_hits": String(summary.withHits), "hit_events": String(hitEvents),
             "compile_ms": String(Int(compileMs)), "prefetch_ms": String(Int(prefetchMs)), "evaluate_ms": String(Int(evalMs)),
             "prefetch_predicates": String(requests.count),
+            "platform": store.platform.rawValue, "other_platform": String(otherPlatform),
         ]
         if let g = set.generated { meta["pack_generated"] = g }
         let sources = set.sources.map { s -> [String: Any] in

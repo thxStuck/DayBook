@@ -40,7 +40,7 @@ public enum SigmaVerifier {
 
     public static func run(store: CaseStore, rules set: SigmaRuleSet, maxCandidates: Int = 400_000,
                            progress: (Int, Int) -> Void = { _, _ in }) throws -> Report {
-        let catalog = SigmaFieldCatalog(has: { store.exactKeyId($0) != nil }, aliases: set.aliases)
+        let catalog = SigmaFieldCatalog(has: { store.exactKeyId($0) != nil }, aliases: set.aliases, platform: store.platform)
         let engine = DQLEngine(store: store, parseTime: { _ in nil })
         let stored = Dictionary(try store.detectionRules().map { ("\($0.source)|\($0.path)", $0) }, uniquingKeysWith: { a, _ in a })
         var report = Report()
@@ -54,7 +54,7 @@ public enum SigmaVerifier {
             // A rule that is constantly false here (its fields never occur) is still checked
             // directly on the events of its logsource: the direct evaluation must find nothing.
             let target: DQLExpr = expr == .constant(false)
-                ? .or((try? SigmaCompiler.variants(rule.logsource))?.map(\.base) ?? [])
+                ? .or((try? SigmaCompiler.variants(rule.logsource, catalog))?.map(\.base) ?? [])
                 : expr
             guard let narrowing = narrowing(target) else {
                 report.skipped.append((rule.title, String(localized: "нет сужающих условий по системным полям")))
@@ -77,7 +77,7 @@ public enum SigmaVerifier {
         for (_, g) in groups.sorted(by: { $0.key < $1.key }) {
             let events = try decode(store, g.ids)
             report.eventsChecked += events.count
-            let results = parallelEvaluate(g.rules.map(\.0), events: events, aliases: set.aliases)
+            let results = parallelEvaluate(g.rules.map(\.0), events: events, aliases: set.aliases, catalog: catalog)
             for (i, (rule, hits)) in g.rules.enumerated() {
                 guard let direct = results[i] else {
                     report.inconclusive.append(rule.title)
@@ -151,7 +151,8 @@ public enum SigmaVerifier {
 
     /// Hits per rule (nil when a regular expression hit the time limit). Parallel over events
     /// in slices, so groups with few rules and many events still use every core.
-    static func parallelEvaluate(_ rules: [SigmaRule], events: [(UInt32, Fields)], aliases: [String: String]) -> [[UInt32]?] {
+    static func parallelEvaluate(_ rules: [SigmaRule], events: [(UInt32, Fields)], aliases: [String: String],
+                                 catalog: SigmaFieldCatalog) -> [[UInt32]?] {
         final class Box: @unchecked Sendable {
             var v: [[[UInt32]]]
             var timeout: [Bool]
@@ -167,7 +168,7 @@ public enum SigmaVerifier {
             var hits: [UInt32] = []
             for (id, f) in events[lo..<hi] {
                 do {
-                    if try matches(rule, f, aliases: aliases) { hits.append(id) }
+                    if try matches(rule, f, aliases: aliases, catalog: catalog) { hits.append(id) }
                 } catch is RegexTimeout {
                     box.lock.withLock { box.timeout[i] = true }
                 } catch {}
@@ -244,8 +245,8 @@ public enum SigmaVerifier {
 
     static let regexResults = RegexResults()
 
-    static func matches(_ rule: SigmaRule, _ f: Fields, aliases: [String: String]) throws -> Bool {
-        let variants = try SigmaCompiler.variants(rule.logsource)
+    static func matches(_ rule: SigmaRule, _ f: Fields, aliases: [String: String], catalog: SigmaFieldCatalog) throws -> Bool {
+        let variants = try SigmaCompiler.variants(rule.logsource, catalog)
         for v in variants {
             guard baseMatches(v.base, f) else { continue }
             var cache: [String: Bool] = [:]

@@ -70,6 +70,7 @@ struct DetectionsView: View {
     @State private var minLevel = 0
     @State private var scope = DetectionScope.hits
     @State private var showLicenses = false
+    @State private var showUpdate = false
     @AppStorage(RuleLibrary.customFolderKey) private var customFolder = ""
 
     var body: some View {
@@ -82,6 +83,7 @@ struct DetectionsView: View {
         }
         .onAppear { if model.detections == nil { model.loadDetections() } }
         .sheet(isPresented: $showLicenses) { RuleLicensesView(meta: model.detectionMeta) { showLicenses = false } }
+        .sheet(isPresented: $showUpdate) { RuleUpdateView(model: model) { showUpdate = false } }
     }
 
     private var toolbar: some View {
@@ -123,6 +125,12 @@ struct DetectionsView: View {
                     Label("Правила", systemImage: "list.bullet.rectangle")
                 }
                 .fixedSize()
+                Button {
+                    showUpdate = true
+                } label: {
+                    Label("Обновить Sigma-правила", systemImage: "arrow.triangle.2.circlepath")
+                }
+                .help("Проверить новый релиз SigmaHQ и правила Hayabusa на GitHub и скачать, если они новее установленных")
                 Button(model.detections?.isEmpty == false ? String(localized: "Запустить заново") : String(localized: "Запустить детекты")) { model.runDetections() }
             }
         }
@@ -225,19 +233,30 @@ struct DetectionsView: View {
                 Text("Прогон \(finished.replacingOccurrences(of: "T", with: " ").replacingOccurrences(of: "Z", with: " UTC"))")
                 Text("· правил \(m["rules_total"] ?? "?"): вычислено \(m["evaluated"] ?? "?"), не поддерживается \(m["unsupported"] ?? "?"), не загружено \(m["failed"] ?? "?"), ошибок \(m["errors"] ?? "?"), с замечаниями \(rules.filter { !$0.warnings.isEmpty }.count)")
                 Text("· сработало \(m["with_hits"] ?? "?") на \(m["hit_events"] ?? "?") событиях")
+                if let other = m["other_platform"], other != "0" {
+                    Text("· правил другой системы не применялось: \(other)")
+                        .help("К кейсу применяются правила его системы: Windows — к журналам .evtx, Linux — к сборам UAC")
+                }
                 Text("· \(String(format: "%.1f", (Double(m["elapsed_ms"] ?? "") ?? 0) / 1000)) с")
                     .help("Компиляция \(m["compile_ms"] ?? "?") мс, предрасчёт подстрок \(m["prefetch_ms"] ?? "?") мс (\(m["prefetch_predicates"] ?? "?") предикатов), вычисление \(m["evaluate_ms"] ?? "?") мс")
             } else {
                 Text("Детекты не запускались")
             }
             Spacer()
-            Button("Правила: SigmaHQ, Hayabusa — DRL 1.1") { showLicenses = true }.buttonStyle(.link)
+            Button(Self.packLabel) { showLicenses = true }.buttonStyle(.link)
         }
         .font(.caption)
         .foregroundStyle(.secondary)
         .lineLimit(1)
         .padding(.horizontal, 8)
         .padding(.vertical, 4)
+    }
+
+    /// The pack in use: versions of SigmaHQ and Hayabusa, downloaded or bundled.
+    static var packLabel: String {
+        guard let info = RuleUpdater.shared.installed else { return String(localized: "Правила: SigmaHQ, Hayabusa — DRL 1.1") }
+        let parts = info.sources.map { "\($0.name) \(RuleUpdateView.version($0))" }.joined(separator: ", ")
+        return (info.installed ? String(localized: "Правила (скачаны): ") : String(localized: "Правила (встроенные): ")) + parts + " — DRL 1.1"
     }
 
     /// Matched rules (with authors, as DRL 1.1 requires) for a report, times in the display zone and UTC.

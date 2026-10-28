@@ -1,4 +1,5 @@
 import EvtxCore
+import DaybookStore
 import Foundation
 import Yams
 
@@ -21,6 +22,18 @@ public indirect enum SigmaSearch: Sendable, Equatable {
     case all([SigmaItem])
     case any([SigmaSearch])
     case keywords([SigmaValue])
+}
+
+extension SigmaRule {
+    /// The system a rule is written for: its logsource product, Windows for Hayabusa rules.
+    public var platform: CasePlatform? {
+        switch logsource["product"]?.lowercased() {
+        case "windows": return .windows
+        case "linux": return .linux
+        case nil: return source == "Hayabusa" ? .windows : nil
+        default: return nil
+        }
+    }
 }
 
 public struct SigmaRule: Sendable, Identifiable {
@@ -193,7 +206,7 @@ public struct SigmaRuleSet: Sendable {
 
     public init() {}
 
-    /// Loads the pack written by scripts/pack_rules.py.
+    /// Loads a pack built by `SigmaPackBuilder` (bundled, downloaded or `evtxdump pack-rules`).
     public static func pack(_ data: Data) throws -> SigmaRuleSet {
         guard let doc = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
             throw SigmaParseError(source: "pack", path: "rules.json", message: "not a JSON object", yaml: "", title: nil)

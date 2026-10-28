@@ -90,13 +90,13 @@ Action = file_time and FilePath startswith /etc/cron and MACB contains m</code><
 <li><strong>System</strong> — details from <code>uac.log</code>, <code>live_response</code> command output by group, UAC's lists, hashes and the collected configuration and autostart files (cron, systemd, sudoers, <code>authorized_keys</code>, profile, PAM, audit rules). Files are read from the collection folder on demand.</li>
 <li><strong>Hosts, Users, IP addresses</strong> — the entity registry.</li>
 <li><strong>Sessions</strong> — wtmp logins: login → logout on the same terminal or a reboot, as <code>last</code> reads them.</li>
+<li><strong>Detections</strong> — SigmaHQ's Linux rules (auditd, auth, sshd, sudo, cron, process launches); the field mapping is described on <a href="detections.html">Sigma detections</a>.</li>
 <li><strong>Processes</strong> — program launches from auditd. auditd writes only the PPID, so parent → child links are reconstructed heuristically and marked 🔗.</li>
 <li>In the event details the <strong>Record</strong> tab shows the original lines (all lines of an audit event or an apt transaction), <code>FIELD=value</code> lines of a journal entry, the decoded wtmp record; <strong>Hex</strong> shows the bytes.</li>
 </ul>
 <h2 id="limits"><a name="limits"></a>Limits</h2>
 <ul>
 <li>The collection must be extracted: <code>.tar.gz</code> and <code>.zip</code> archives are not opened.</li>
-<li>Sigma detections for Linux are not bundled yet: the Detections section is hidden in Linux cases.</li>
 <li>Binary logs (<code>mysql-bin.*</code>, <code>faillog</code>, <code>tallylog</code>) are only listed as sources.</li>
 <li>The records of one audit event are merged when they follow each other; records of different events mixed together give several events with the same <code>AuditId</code>.</li>
 <li>The time of lines without a zone or a year is reconstructed by the rules above and flagged — check it against events with an exact time.</li>

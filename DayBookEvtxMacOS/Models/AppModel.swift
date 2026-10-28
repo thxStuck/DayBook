@@ -204,8 +204,7 @@ final class AppModel {
                 await MainActor.run {
                     self?.importState = nil
                     self?.open(caseURL)
-                    // Sigma rules of the bundled packs are Windows rules: Linux cases skip them.
-                    if kind == .windows, AppDefaults.store.object(forKey: "import.runDetections") as? Bool ?? true {
+                    if AppDefaults.store.object(forKey: "import.runDetections") as? Bool ?? true {
                         self?.caseModel?.runDetections()
                     }
                 }

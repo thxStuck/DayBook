@@ -22,15 +22,38 @@ the rule card; you can copy it and run it by hand.
 
 | Set | Rules | Version | Licence |
 |---|---|---|---|
-| [SigmaHQ](https://github.com/SigmaHQ/sigma) | 2,554 | Release 2026-07-09, r2026-04-01-50-g552f3fee4 | Detection Rule License 1.1 |
-| [Hayabusa rules](https://github.com/Yamato-Security/hayabusa-rules) | 194 | main branch | Detection Rule License 1.1 |
+| [SigmaHQ](https://github.com/SigmaHQ/sigma) | 2,554 for Windows, 183 for Linux | release r2026-07-01 of 2026-07-09 | Detection Rule License 1.1 |
+| [Hayabusa rules](https://github.com/Yamato-Security/hayabusa-rules) | 196 (Windows) | commit 97b3fd9 of 2026-10-28 | Detection Rule License 1.1 |
 
-- From SigmaHQ: `rules/windows/**` plus rules with `product: windows` from `rules/` and
-  `rules-emerging-threats/`. From Hayabusa: `hayabusa/**` (its copies of SigmaHQ rules in `sigma/`
-  are not taken).
-- The 248 Hayabusa field aliases ship with the Hayabusa rules.
+- From SigmaHQ: `rules/windows/**` and `rules/linux/**` plus rules with `product: windows` or
+  `product: linux` from `rules/` and `rules-emerging-threats/`. From Hayabusa: `hayabusa/**` (its
+  copies of SigmaHQ rules in `sigma/` are not taken).
+- Hayabusa's field aliases (`config/eventkey_alias.txt`) ship with the Hayabusa rules.
+- A case gets the rules of its system: a Windows case the Windows and Hayabusa rules, a Linux case
+  the Linux rules. The run's details show how many rules of the other system were skipped.
 - The author of every rule is shown next to each match. The sets, versions and the full DRL 1.1 text
   are under Rules → Rule sets and licenses….
+
+### Updating the rules
+
+The **Update Sigma Rules** button on the Detections screen:
+
+1. The app compares the installed set with the latest SigmaHQ release and the latest commit of the
+   Hayabusa rules on GitHub and shows both versions.
+2. When GitHub has something newer, it shows what will be downloaded (the `sigma_all_rules.zip`
+   archive of the SigmaHQ release and the Hayabusa rules archive of that commit, with sizes) and
+   downloads them on Download and Install.
+3. The SHA-256 of the SigmaHQ archive is checked against the one GitHub publishes; a new rule set is
+   built, checked (the rules must load and their number must be plausible) and only then installed
+   in `~/Library/Application Support/<app>/Rules/rules.json`.
+4. Run Detections Again runs the new rules.
+
+The version of each set, the release or commit date and the SHA-256 of the downloaded archive are
+recorded in the set and shown in the update sheet and in Rule sets and licenses. Use Bundled Rules
+removes the downloaded set. A damaged downloaded set falls back to the bundled rules.
+
+From the command line the same set is built with
+`evtxdump pack-rules <sigma_all_rules.zip> <release tag> <hayabusa-rules.zip> <commit> <rules.json>`.
 
 ### Your own rules folder
 
@@ -62,7 +85,25 @@ For the Security 4688 variant fields are renamed: `Image` → `NewProcessName`,
 `ParentImage` → `ParentProcessName`, `IntegrityLevel` → `MandatoryLabel` (integrity levels become
 `S-1-16-…` SIDs).
 
-Rules with a `product` other than `windows` are not supported.
+### Linux (UAC collections)
+
+| logsource | Events of a Linux case |
+|---|---|
+| `category: process_creation` | program launches from auditd (`Action = process_exec`) |
+| `service: auditd` | events of `audit/audit.log` |
+| `service: auth` | `auth.log`, `secure` and journald entries of the auth/authpriv facility |
+| `service: syslog` | `syslog`, `messages` |
+| `service: sshd`, `sudo`, `cron`, `clamav`, `vsftpd`, `guacamole` | entries of that program in any log |
+| only `product: linux` | every event of the case |
+
+Fields are renamed where the meaning is the same: for process launches `Image` → `exe`,
+`CurrentDirectory` → `cwd`, `User` → `UidName`, `LogonId` → `ses`; for auditd `type` → `Type`,
+`SYSCALL` → `SyscallName`; for sudo `USER` → `TargetUserName`. auditd records have no `ParentImage`
+or `ParentCommandLine` — rules that use them show these fields as absent. The `file_event`,
+`network_connection` and other Sysmon for Linux categories do not occur in a UAC collection — such
+rules are marked not supported with that reason.
+
+Rules with a `product` other than `windows` and `linux` are not supported.
 
 ### Fields
 

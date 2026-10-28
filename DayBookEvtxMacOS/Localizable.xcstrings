@@ -100,6 +100,26 @@
         }
       }
     },
+    " — новее установленной": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": " — newer than installed"
+          }
+        }
+      }
+    },
+    " — установлена": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": " — installed"
+          }
+        }
+      }
+    },
     " ⚠ без преаутентификации": {
       "localizations": {
         "en": {
@@ -304,6 +324,22 @@
           "stringUnit": {
             "state": "new",
             "value": "%1$@%2$@ групп"
+          }
+        }
+      }
+    },
+    "%@: %@ · правил %lld%@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: %@ · %lld rules%@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@: %2$@ · правил %3$lld%4$@"
           }
         }
       }
@@ -555,6 +591,48 @@
     },
     "Excel (XLSX)": {
       "shouldTranslate": false
+    },
+    "GitHub временно ограничил число запросов без входа (60 в час). Попробуйте позже.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GitHub temporarily limits requests without sign-in (60 per hour). Try again later."
+          }
+        }
+      }
+    },
+    "GitHub ответил кодом %lld на запрос %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GitHub answered %lld to %@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "new",
+            "value": "GitHub ответил кодом %1$lld на запрос %2$@"
+          }
+        }
+      }
+    },
+    "Hayabusa: %@ от %@%@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hayabusa: %@ of %@%@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Hayabusa: %1$@ от %2$@%3$@"
+          }
+        }
+      }
     },
     "Hex": {
       "shouldTranslate": false
@@ -870,6 +948,16 @@
         }
       }
     },
+    "SHA-256 архива SigmaHQ не совпал с опубликованным на GitHub — архив не установлен": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The SHA-256 of the SigmaHQ archive does not match the one GitHub publishes — the archive was not installed"
+          }
+        }
+      }
+    },
     "SHA-256 исходных файлов": {
       "localizations": {
         "en": {
@@ -945,6 +1033,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Security 4688/4689 — linked by PID"
+          }
+        }
+      }
+    },
+    "SigmaHQ: релиз %@ от %@ · %@%@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SigmaHQ: release %@ of %@ · %@%@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "new",
+            "value": "SigmaHQ: релиз %1$@ от %2$@ · %3$@%4$@"
           }
         }
       }
@@ -1305,6 +1409,16 @@
         }
       }
     },
+    "· правил другой системы не применялось: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "· rules of the other system not applied: %@"
+          }
+        }
+      }
+    },
     "· сработало %@ на %@ событиях": {
       "localizations": {
         "en": {
@@ -1457,6 +1571,16 @@
         }
       }
     },
+    "Будут скачаны архив %@ из релиза SigmaHQ (SHA-256 сверяется с опубликованным GitHub) и архив правил Hayabusa этого коммита; из них соберётся новый набор правил Windows и Linux. Встроенные правила останутся запасными.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The %@ archive of the SigmaHQ release (its SHA-256 is checked against the one GitHub publishes) and the Hayabusa rules archive of this commit will be downloaded and built into a new set of Windows and Linux rules. The bundled rules stay as the fallback."
+          }
+        }
+      }
+    },
     "В 4688 записан только PID родителя: связь восстановлена эвристически (значок 🔗). PID переиспользуются, проверяйте по времени.": {
       "localizations": {
         "en": {
@@ -1533,6 +1657,16 @@
         }
       }
     },
+    "В последнем релизе SigmaHQ нет архива %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The latest SigmaHQ release has no %@ archive"
+          }
+        }
+      }
+    },
     "В приложении нет пакета правил rules.json": {
       "localizations": {
         "en": {
@@ -1549,6 +1683,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "The collection has no command output or configuration files (or its folder is not available)."
+          }
+        }
+      }
+    },
+    "В скачанных архивах слишком мало правил — пакет не установлен": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The downloaded archives hold too few rules — the set was not installed"
           }
         }
       }
@@ -1579,6 +1723,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Web servers"
+          }
+        }
+      }
+    },
+    "Вернуть встроенные правила": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use Bundled Rules"
           }
         }
       }
@@ -2813,6 +2967,16 @@
         }
       }
     },
+    "Запустить детекты заново": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Run Detections Again"
+          }
+        }
+      }
+    },
     "Запустить заново": {
       "localizations": {
         "en": {
@@ -3147,6 +3311,16 @@
         }
       }
     },
+    "Используются правила, встроенные в приложение": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The rules bundled with the app are in use"
+          }
+        }
+      }
+    },
     "История запросов": {
       "localizations": {
         "en": {
@@ -3243,6 +3417,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Source file not found — it was moved or deleted after import."
+          }
+        }
+      }
+    },
+    "К кейсу применяются правила его системы: Windows — к журналам .evtx, Linux — к сборам UAC": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A case gets the rules of its system: Windows rules for .evtx logs, Linux rules for UAC collections"
           }
         }
       }
@@ -3609,6 +3793,16 @@
         }
       }
     },
+    "Набор собран %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Set built %@"
+          }
+        }
+      }
+    },
     "Наборы правил": {
       "localizations": {
         "en": {
@@ -3735,6 +3929,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Could not save the note: "
+          }
+        }
+      }
+    },
+    "Не удалось узнать последнюю версию правил Hayabusa": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not find out the latest version of the Hayabusa rules"
           }
         }
       }
@@ -3931,6 +4135,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "About DayBookEvtxMacOS"
+          }
+        }
+      }
+    },
+    "Обновить Sigma-правила": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Update Sigma Rules"
+          }
+        }
+      }
+    },
+    "Обновление Sigma-правил": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Updating Sigma Rules"
           }
         }
       }
@@ -4772,6 +4996,16 @@
         }
       }
     },
+    "Последние версии на GitHub": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Latest versions on GitHub"
+          }
+        }
+      }
+    },
     "Похожие: ": {
       "localizations": {
         "en": {
@@ -4792,6 +5026,26 @@
         }
       }
     },
+    "Правила (встроенные): ": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rules (bundled): "
+          }
+        }
+      }
+    },
+    "Правила (скачаны): ": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rules (downloaded): "
+          }
+        }
+      }
+    },
     "Правила Sigma: SigmaHQ и Hayabusa — Detection Rule License 1.1. Автор каждого правила показывается рядом с каждым срабатыванием.": {
       "localizations": {
         "en": {
@@ -4802,12 +5056,32 @@
         }
       }
     },
+    "Правила SigmaHQ для Linux (auditd, auth, sshd, sudo, cron, запуски процессов) из установленного набора и папка своих правил. Идёт в фоне после открытия кейса.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SigmaHQ's Linux rules (auditd, auth, sshd, sudo, cron, process launches) from the installed set and your own rules folder. Runs in the background after the case opens."
+          }
+        }
+      }
+    },
     "Правила SigmaHQ и Hayabusa из поставки (DRL 1.1) и папка своих правил, если выбрана. Идёт в фоне после открытия кейса; результаты сохраняются в кейсе, их можно перезапустить на экране «Детекты».": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Bundled SigmaHQ and Hayabusa rules (DRL 1.1) plus your rules folder, if set. Runs in the background after the case opens; results are saved in the case and can be re-run on the Detections screen."
+          }
+        }
+      }
+    },
+    "Правила актуальны": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The rules are up to date"
           }
         }
       }
@@ -4922,6 +5196,26 @@
         }
       }
     },
+    "Проверить новый релиз SigmaHQ и правила Hayabusa на GitHub и скачать, если они новее установленных": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Check GitHub for a new SigmaHQ release and Hayabusa rules and download them if they are newer than the installed ones"
+          }
+        }
+      }
+    },
+    "Проверить обновления": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Check for Updates"
+          }
+        }
+      }
+    },
     "Проверка доступа: %@\\%@%@ [%@]": {
       "localizations": {
         "en": {
@@ -4934,6 +5228,26 @@
           "stringUnit": {
             "state": "new",
             "value": "Проверка доступа: %1$@\\%2$@%3$@ [%4$@]"
+          }
+        }
+      }
+    },
+    "Проверяю архивы и собираю набор правил…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Checking the archives and building the rule set…"
+          }
+        }
+      }
+    },
+    "Проверяю релизы на GitHub…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Checking releases on GitHub…"
           }
         }
       }
@@ -5128,6 +5442,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Size"
+          }
+        }
+      }
+    },
+    "Размер архива SigmaHQ не совпал с опубликованным на GitHub — архив не установлен": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The size of the SigmaHQ archive does not match the one GitHub publishes — the archive was not installed"
           }
         }
       }
@@ -5458,12 +5782,32 @@
         }
       }
     },
+    "Скачать и установить": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Download and Install"
+          }
+        }
+      }
+    },
     "Скачивание и запуск из /tmp, /dev/shm": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Downloads and launches from /tmp, /dev/shm"
+          }
+        }
+      }
+    },
+    "Скачиваю %@…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Downloading %@…"
           }
         }
       }
@@ -6296,6 +6640,16 @@
         }
       }
     },
+    "Удалить скачанный набор: приложение снова использует правила, вшитые в эту версию": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove the downloaded set: the app uses the rules bundled with this version again"
+          }
+        }
+      }
+    },
     "Удалён файл %@ (%@)": {
       "localizations": {
         "en": {
@@ -6388,6 +6742,16 @@
         }
       }
     },
+    "Установлен скачанный набор": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A downloaded set is installed"
+          }
+        }
+      }
+    },
     "Установлена служба %@: %@ (%@, %@)": {
       "localizations": {
         "en": {
@@ -6416,6 +6780,22 @@
           "stringUnit": {
             "state": "new",
             "value": "Установлена служба %1$@: %2$@ [%3$@]"
+          }
+        }
+      }
+    },
+    "Установлено: SigmaHQ %@ (Windows %lld, Linux %lld), Hayabusa %@ (%lld); не загрузилось %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installed: SigmaHQ %@ (Windows %lld, Linux %lld), Hayabusa %@ (%lld); failed to load %lld"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Установлено: SigmaHQ %1$@ (Windows %2$lld, Linux %3$lld), Hayabusa %4$@ (%5$lld); не загрузилось %6$lld"
           }
         }
       }
@@ -7058,6 +7438,16 @@
         }
       }
     },
+    "все журналы Linux": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "all Linux logs"
+          }
+        }
+      }
+    },
     "вход вне разрешённого времени": {
       "localizations": {
         "en": {
@@ -7280,6 +7670,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "logsource category “%@” is not mapped to .evtx logs"
+          }
+        }
+      }
+    },
+    "категория logsource «%@»: в сборе UAC нет таких событий (их пишет Sysmon for Linux)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "logsource category “%@”: a UAC collection has no such events (Sysmon for Linux writes them)"
           }
         }
       }
@@ -7898,6 +8298,16 @@
         }
       }
     },
+    "правило для «%@», кейс — Linux": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "a rule for “%@”, the case is Linux"
+          }
+        }
+      }
+    },
     "прежнее имя": {
       "localizations": {
         "en": {
@@ -8030,6 +8440,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "server requires Kerberos only (U2U)"
+          }
+        }
+      }
+    },
+    "сервис logsource «%@» не сопоставлен журналам сбора UAC": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "logsource service “%@” is not mapped to the logs of a UAC collection"
           }
         }
       }

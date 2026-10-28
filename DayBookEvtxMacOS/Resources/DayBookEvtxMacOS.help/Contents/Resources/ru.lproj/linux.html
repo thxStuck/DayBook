@@ -90,13 +90,13 @@ Action = file_time and FilePath startswith /etc/cron and MACB contains m</code><
 <li><strong>Система</strong> — сведения из <code>uac.log</code>, вывод команд <code>live_response</code> по группам, списки UAC, хеши и собранные файлы настроек и автозапуска (cron, systemd, sudoers, <code>authorized_keys</code>, profile, PAM, правила auditd). Файлы читаются из папки сбора по запросу.</li>
 <li><strong>Хосты, пользователи, IP</strong> — реестр сущностей.</li>
 <li><strong>Сеансы</strong> — входы из wtmp: вход → выход на том же терминале или перезагрузка, как в <code>last</code>.</li>
+<li><strong>Детекты</strong> — правила SigmaHQ для Linux (auditd, auth, sshd, sudo, cron, запуски процессов); сопоставление полей описано на странице <a href="detections.html">Sigma-детекты</a>.</li>
 <li><strong>Процессы</strong> — запуски программ из auditd. auditd пишет только PPID, поэтому связь «родитель → потомок» восстанавливается эвристически и помечена значком 🔗.</li>
 <li>В деталях события вкладка <strong>Запись</strong> показывает исходные строки (для события auditd и транзакции apt — все строки), для journald — поля <code>FIELD=value</code>, для wtmp — расшифровку записи; <strong>Hex</strong> — байты.</li>
 </ul>
 <h2 id="ограничения"><a name="ограничения"></a>Ограничения</h2>
 <ul>
 <li>Нужен распакованный сбор: архивы <code>.tar.gz</code> и <code>.zip</code> не открываются.</li>
-<li>Sigma-детекты для Linux пока не входят в поставку: раздел «Детекты» в Linux-кейсе скрыт.</li>
 <li>Двоичные журналы (<code>mysql-bin.*</code>, <code>faillog</code>, <code>tallylog</code>) только перечисляются в источниках.</li>
 <li>Записи auditd одного события объединяются, если идут подряд; при перемешивании записей разных событий получится несколько событий с одним <code>AuditId</code>.</li>
 <li>Время строк без пояса и года восстановлено по правилам выше и помечено флагами — проверяйте его по событиям с точным временем.</li>
