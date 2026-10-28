@@ -14,7 +14,7 @@ struct FacetSection: Identifiable {
 }
 
 enum MainMode: String, CaseIterable, Identifiable {
-    case events, timeline, logs, detections, hosts, users, ips, sessions, processes
+    case events, timeline, logs, system, detections, hosts, users, ips, sessions, processes
     var id: String { rawValue }
     var title: String {
         switch self {
@@ -27,6 +27,7 @@ enum MainMode: String, CaseIterable, Identifiable {
         case .sessions: String(localized: "Сеансы")
         case .processes: String(localized: "Процессы")
         case .detections: String(localized: "Детекты")
+        case .system: String(localized: "Система")
         }
     }
     var icon: String {
@@ -40,6 +41,7 @@ enum MainMode: String, CaseIterable, Identifiable {
         case .ips: "network"
         case .sessions: "person.badge.clock"
         case .processes: "point.3.connected.trianglepath.dotted"
+        case .system: "server.rack"
         }
     }
 
@@ -63,7 +65,7 @@ final class CaseModel {
     var isLinux: Bool { store.platform == .linux }
     /// Sections of the main window. Linux cases have no Windows-only analyses (logon sessions,
     /// process trees and Sigma rules are built from Windows events).
-    var modes: [MainMode] { isLinux ? [.events, .timeline, .logs, .hosts, .users, .ips] : MainMode.allCases }
+    var modes: [MainMode] { isLinux ? [.events, .timeline, .logs, .system, .hosts, .users, .ips] : MainMode.allCases.filter { $0 != .system } }
 
     // Inputs
     var queryText = ""

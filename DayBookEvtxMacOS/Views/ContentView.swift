@@ -156,6 +156,7 @@ struct ImportOptionsSheet: View {
     @AppStorage("import.mergeDuplicates") private var mergeDuplicates = true
     @AppStorage("import.hashSources") private var hashSources = true
     @AppStorage("import.runDetections") private var runDetections = true
+    @AppStorage("import.fileTimeline") private var fileTimeline = true
     @State private var kind: ImportKind = .windows
     @State private var found: ImportKind.Found?
 
@@ -192,6 +193,8 @@ struct ImportOptionsSheet: View {
                 Text("Папка считается распакованным сбором UAC (Unix-like Artifacts Collector): журналы берутся из [root]/var/log, истории оболочек — из домашних папок, сведения о системе — из uac.log. Разбираются syslog (auth.log, syslog, kern.log…), журналы systemd (journald, включая сжатие zstd), auditd, журналы веб-серверов (access, JSON, error), dpkg и apt, общий журнал MySQL, журналы вида «время + текст», wtmp, btmp, utmp, lastlog и истории bash, zsh, fish — включая ротации .gz и .xz. Файлы, которые не разобраны, тоже попадают в список источников с причиной.")
                     .font(.callout)
                     .fixedSize(horizontal: false, vertical: true)
+                option($fileTimeline, "Таймлайн файловой системы (bodyfile)",
+                       "Времена изменения, доступа, смены метаданных и создания каждого файла из bodyfile сбора; совпадающие времена файла — одно событие с меткой MACB. На больших системах это миллионы событий.")
                 option($hashSources, "Считать SHA-256 исходных файлов",
                        "Для фиксации исходных данных (chain of custody): хеш попадает в сведения о кейсе и в экспорт.")
             }

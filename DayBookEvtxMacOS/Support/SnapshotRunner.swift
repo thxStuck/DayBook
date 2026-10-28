@@ -88,7 +88,7 @@ enum SnapshotRunner {
             if ProcessInfo.processInfo.arguments.contains("-snapshotLayout") {
                 for size in [CGSize(width: 1100, height: 640), CGSize(width: 1280, height: 800), CGSize(width: 1700, height: 1000)] {
                     NSApp.windows.first(where: { $0.isVisible })?.setFrame(NSRect(x: 40, y: 40, width: size.width, height: size.height), display: true)
-                    for mode in MainMode.allCases {
+                    for mode in model.modes {
                         model.mode = mode
                         if mode == .events || mode == .timeline { model.showDetails = true }
                         await pause(mode == .logs ? 2.0 : 1.2)
@@ -361,7 +361,7 @@ enum SnapshotRunner {
             log("   file viewer \(src.name): rows=\(v.result.count)")
             snap(dir, "L5b-logs-file")
         }
-        for (mode, name) in [(MainMode.users, "L6-users"), (.ips, "L7-ips"), (.hosts, "L8-hosts"), (.timeline, "L9-timeline")] {
+        for (mode, name) in [(MainMode.users, "L6-users"), (.ips, "L7-ips"), (.hosts, "L8-hosts"), (.system, "L8b-system"), (.timeline, "L9-timeline")] {
             model.mode = mode
             await pause(1.5)
             if let k = mode.kind {

@@ -56,6 +56,8 @@ enum LinuxVocabulary {
         "Server", "Upstream", "Host", "ConnectionId", "Prefix", "PackageName", "PackageArch", "Version", "OldVersion",
         "PackageStatus", "DpkgPhase", "ConfigFile", "ConffileAction", "EndDate", "Install", "Upgrade", "Remove", "Purge",
         "Downgrade", "Reinstall", "Error", "Shell", "DbCommand", "DbArgument", "DbUser", "Database", "UserName",
+        // file system timeline
+        "MACB", "FilePath", "FileName", "Inode", "Mode", "FileOwner", "Size", "Md5",
         // audit
         "AuditId", "comm", "exe", "syscall", "key", "success", "exit", "res", "acct", "addr", "hostname", "op",
         "pid", "ppid", "auid", "uid", "euid", "gid", "ses", "tty", "cwd", "name", "proctitle", "argc", "cmd",

@@ -2,7 +2,7 @@ import Foundation
 
 /// A file of a collection that becomes a source of the case, parsed or not.
 struct LinuxSourcePlan {
-    enum Kind: Equatable { case text, wtmp, btmp, utmp, lastlog, journal, unsupported(String) }
+    enum Kind: Equatable { case text, wtmp, btmp, utmp, lastlog, journal, bodyfile, unsupported(String) }
 
     var url: URL
     /// Path on the analysed system (`/var/log/auth.log.1`).
@@ -83,6 +83,15 @@ enum LinuxPlan {
                 let u = root.appendingPathComponent(extra)
                 let v = try? u.resourceValues(forKeys: [.isRegularFileKey, .isSymbolicLinkKey])
                 if v?.isRegularFile == true, v?.isSymbolicLink != true { files.append(u) }
+            }
+            // The file system timeline UAC built (outside [root]).
+            let body = c.url.appendingPathComponent("bodyfile/bodyfile.txt")
+            if (try? body.resourceValues(forKeys: [.isRegularFileKey]))?.isRegularFile == true {
+                let v = try? body.resourceValues(forKeys: [.fileSizeKey, .contentModificationDateKey])
+                out.append(LinuxSourcePlan(url: body, originalPath: "bodyfile/bodyfile.txt", collection: ci, host: host,
+                                           channel: "bodyfile", kind: .bodyfile, size: v?.fileSize ?? 0,
+                                           reference: v?.contentModificationDate ?? Date(), referenceFromBodyfile: false,
+                                           zone: zone, zoneName: c.info.timeZone ?? "UTC"))
             }
             let rootPath = root.standardizedFileURL.path
             for u in files.sorted(by: { $0.path < $1.path }) {

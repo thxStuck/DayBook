@@ -25,6 +25,18 @@ public struct UacCollection: Sendable {
 
     public var rootFolder: URL { url.appendingPathComponent("[root]") }
 
+    /// The collection a case was built from, if its folder is still there.
+    public init?(info: UacInfo) {
+        let u = URL(fileURLWithPath: info.path)
+        guard Self.isCollection(u) else { return nil }
+        self.init(url: u, info: info)
+    }
+
+    init(url: URL, info: UacInfo) {
+        self.url = url
+        self.info = info
+    }
+
     /// The host name UAC recorded, else `/etc/hostname`, else the folder name.
     public var host: String {
         if let h = info.hostname, !h.isEmpty { return h }

@@ -5,6 +5,8 @@ import Foundation
 public struct LinuxImportOptions: Sendable {
     /// SHA-256 of every source file (chain of custody).
     public var hashSources = true
+    /// The file system timeline from `bodyfile/bodyfile.txt` (up to four events per file).
+    public var fileTimeline = true
     public init() {}
 }
 
@@ -76,7 +78,13 @@ public final class UacImporter: @unchecked Sendable {
 
         // Pass 1: formats, jobs and sort keys.
         progress(ImportProgress(phase: .indexing, fraction: 0, events: 0))
-        let results: [FileResult] = parallelMap(plans.count) { i in Self.scan(plans[i], src: i, users: users[plans[i].collection]) }
+        let fileTimeline = options.fileTimeline
+        let results: [FileResult] = parallelMap(plans.count) { i in
+            if plans[i].kind == .bodyfile, !fileTimeline {
+                return FileResult(format: "bodyfile", notes: [String(localized: "таймлайн файловой системы выключен в параметрах импорта")])
+            }
+            return Self.scan(plans[i], src: i, users: users[plans[i].collection])
+        }
         if cancelled() { throw CancellationError() }
         var jobs: [LinuxJob] = [], jobKeys: [[RecordKey]] = []
         for r in results {
@@ -101,6 +109,7 @@ public final class UacImporter: @unchecked Sendable {
                 if let data = contents.content(job.source, url: plan.url) {
                     switch plan.kind {
                     case .text: records = LinuxText.records(plan, data: data, job: job)
+                    case .bodyfile: records = Bodyfile.records(plan, data: data, job: job, users: users[plan.collection])
                     case .journal:
                         if let jf = JournalFile(data) {
                             jf.forEachEntry(from: job.bytes.lowerBound, to: job.bytes.upperBound) { e in
@@ -141,7 +150,8 @@ public final class UacImporter: @unchecked Sendable {
         let written = try CaseWriter(caseURL: caseURL).write(
             assignment: assignment, jobKeys: jobKeys, sources: sourceRows, groupSize: 8,
             meta: [("platform", "linux"), ("collector", "uac"), ("uac.collections", infoJSON),
-                   ("option.hashSources", options.hashSources ? "1" : "0")],
+                   ("option.hashSources", options.hashSources ? "1" : "0"),
+                   ("option.fileTimeline", options.fileTimeline ? "1" : "0")],
             failedFiles: summary.failedFiles, requestedSources: sources,
             produce: produce, progress: progress, cancelled: cancelled)
         summary.files = results.filter { !$0.keys.allSatisfy(\.isEmpty) }.count
@@ -195,6 +205,12 @@ public final class UacImporter: @unchecked Sendable {
             return r
         case .journal:
             return scanJournal(p, data: data, src: src, notes: notes)
+        case .bodyfile:
+            let b = Bodyfile.plan(p, data: data, src: src)
+            var r = FileResult(jobs: b.jobs, keys: b.keys, format: "bodyfile")
+            r.skipped = b.skipped
+            r.notes = notes + [String(localized: "времена файлов на момент сбора; одинаковые времена файла — одно событие (MACB)")]
+            return r
         default:
             let e = LinuxBinary.events(p, data: data, src: src, users: users, records: false)
             let job = LinuxJob(source: src, bytes: 0..<data.count, firstLine: 1)

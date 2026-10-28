@@ -132,6 +132,17 @@
       },
       "shouldTranslate": false
     },
+    "%@ · %@ %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@ · %2$@ %3$@"
+          }
+        }
+      },
+      "shouldTranslate": false
+    },
     "%@ · %@%@": {
       "localizations": {
         "ru": {
@@ -1011,6 +1022,22 @@
         }
       }
     },
+    "UAC %@ · пояс %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "UAC %@ · zone %@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "new",
+            "value": "UAC %1$@ · пояс %2$@"
+          }
+        }
+      }
+    },
     "UTC": {
       "shouldTranslate": false
     },
@@ -1506,12 +1533,32 @@
         }
       }
     },
+    "В сборе нет вывода команд и файлов настроек (или папка сбора недоступна).": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The collection has no command output or configuration files (or its folder is not available)."
+          }
+        }
+      }
+    },
     "В таймлайне": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "In timeline"
+          }
+        }
+      }
+    },
+    "Веб-корень /var/www": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Web root /var/www"
           }
         }
       }
@@ -1563,6 +1610,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "View"
+          }
+        }
+      }
+    },
+    "Виртуальные машины": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Virtual machines"
           }
         }
       }
@@ -1681,6 +1738,16 @@
           "stringUnit": {
             "state": "new",
             "value": "Восстановлено из slack: найдено %1$@, уникальных %2$@ · схлопнуто копий: %3$@ · ошибок разбора: %4$@"
+          }
+        }
+      }
+    },
+    "Времена изменения, доступа, смены метаданных и создания каждого файла из bodyfile сбора; совпадающие времена файла — одно событие с меткой MACB. На больших системах это миллионы событий.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modification, access, metadata change and birth times of every file from the collection's bodyfile; equal times of a file are one event with a MACB mark. On large systems this is millions of events."
           }
         }
       }
@@ -1926,6 +1993,16 @@
         }
       }
     },
+    "Выберите файл": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose a file"
+          }
+        }
+      }
+    },
     "Выбрать": {
       "localizations": {
         "en": {
@@ -2124,6 +2201,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Detections not run"
+          }
+        }
+      }
+    },
+    "Диски и монтирование": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Disks and mounts"
           }
         }
       }
@@ -2830,6 +2917,16 @@
         }
       }
     },
+    "Изменения в /etc": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Changes in /etc"
+          }
+        }
+      }
+    },
     "Изменения учётных записей и групп": {
       "localizations": {
         "en": {
@@ -2996,6 +3093,16 @@
           "stringUnit": {
             "state": "new",
             "value": "Исключить: %1$@ ≠ %2$@"
+          }
+        }
+      }
+    },
+    "Исполняемые файлы в домашних папках": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Executable files in home folders"
           }
         }
       }
@@ -3236,6 +3343,16 @@
         }
       }
     },
+    "Контейнеры": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Containers"
+          }
+        }
+      }
+    },
     "Копии этой записи": {
       "localizations": {
         "en": {
@@ -3406,6 +3523,16 @@
         }
       }
     },
+    "Модификаторы": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modifiers"
+          }
+        }
+      }
+    },
     "Модуль %@ загружен в %@": {
       "localizations": {
         "en": {
@@ -3468,6 +3595,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Click a value in the table, details or sidebar to add a filter"
+          }
+        }
+      }
+    },
+    "Настройки и автозапуск (файлы из [root])": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Configuration and autostart (files from [root])"
           }
         }
       }
@@ -3754,6 +3891,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "About DayBookEvtxMacOS"
+          }
+        }
+      }
+    },
+    "Оборудование": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hardware"
           }
         }
       }
@@ -4096,6 +4243,16 @@
         }
       }
     },
+    "Пакеты": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Packages"
+          }
+        }
+      }
+    },
     "Пакеты и базы данных": {
       "localizations": {
         "en": {
@@ -4112,6 +4269,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Folder with Sigma rules (.yml)"
+          }
+        }
+      }
+    },
+    "Папка сбора не найдена: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Collection folder not found: %@"
           }
         }
       }
@@ -4340,6 +4507,16 @@
           "stringUnit": {
             "state": "new",
             "value": "Показаны %1$lld из %2$@ — все значения…"
+          }
+        }
+      }
+    },
+    "Показаны первые 4 МБ файла.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The first 4 MB of the file are shown."
           }
         }
       }
@@ -5301,6 +5478,16 @@
         }
       }
     },
+    "Слева — вывод команд на момент сбора (live_response), списки UAC и собранные файлы настроек и автозапуска. Файлы читаются из папки сбора и не изменяются.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On the left: command output at collection time (live_response), UAC's lists and the collected configuration and autostart files. Files are read from the collection folder and not changed."
+          }
+        }
+      }
+    },
     "Слева — журналы кейса, как в «Просмотре событий» Windows. События выбранного журнала показываются здесь, новые сверху; это не меняет запрос в разделе «События».": {
       "localizations": {
         "en": {
@@ -5764,6 +5951,16 @@
         }
       }
     },
+    "Списки UAC (suid, скрытые, доступные на запись…)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "UAC lists (suid, hidden, writable…)"
+          }
+        }
+      }
+    },
     "Сработавшие": {
       "localizations": {
         "en": {
@@ -5917,6 +6114,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Timeline"
+          }
+        }
+      }
+    },
+    "Таймлайн файловой системы (bodyfile)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "File system timeline (bodyfile)"
           }
         }
       }
@@ -6249,6 +6456,26 @@
         }
       }
     },
+    "Файловая система": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "File system"
+          }
+        }
+      }
+    },
+    "Файлы в /tmp, /var/tmp, /dev/shm": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Files in /tmp, /var/tmp, /dev/shm"
+          }
+        }
+      }
+    },
     "Файлы журналов": {
       "localizations": {
         "en": {
@@ -6305,6 +6532,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Filter by selection"
+          }
+        }
+      }
+    },
+    "Фильтр по имени": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filter by name"
           }
         }
       }
@@ -6411,6 +6648,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tail, bytes"
+          }
+        }
+      }
+    },
+    "Хеши исполняемых файлов": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hashes of executables"
           }
         }
       }
@@ -6531,6 +6778,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Reading the record from the source file…"
+          }
+        }
+      }
+    },
+    "Читаю папку сбора…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reading the collection folder…"
           }
         }
       }
@@ -6727,6 +6984,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "recovered from slack"
+          }
+        }
+      }
+    },
+    "времена файлов на момент сбора; одинаковые времена файла — одно событие (MACB)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "file times at collection time; equal times of a file are one event (MACB)"
           }
         }
       }
@@ -7853,6 +8120,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "subject"
+          }
+        }
+      }
+    },
+    "таймлайн файловой системы выключен в параметрах импорта": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "the file system timeline is turned off in the import options"
           }
         }
       }

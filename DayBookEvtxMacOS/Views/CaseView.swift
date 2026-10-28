@@ -96,6 +96,8 @@ struct CaseView: View {
                 DetectionsView(model: model)
             } else if model.mode == .logs {
                 LogsView(model: model)
+            } else if model.mode == .system {
+                SystemView(model: model)
             } else {
                 QueryBar(model: model)
                 Divider()

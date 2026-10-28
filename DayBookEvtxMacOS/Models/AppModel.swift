@@ -178,6 +178,7 @@ final class AppModel {
         case .linux:
             var o = LinuxImportOptions()
             o.hashSources = options.hashSources
+            o.fileTimeline = AppDefaults.store.object(forKey: "import.fileTimeline") as? Bool ?? true
             let importer = UacImporter(sources: sources, caseURL: caseURL, options: o)
             run = { try importer.run(progress: $0, cancelled: $1) }
         }
